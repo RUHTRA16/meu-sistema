@@ -69,12 +69,27 @@ class CharacterController extends Controller
             'personality' => ['nullable', 'string', 'max:5000'],
             'backstory' => ['nullable', 'string', 'max:5000'],
 
-            'agi' => ['required', 'integer', 'min:0', 'max:5'],
-            'forca' => ['required', 'integer', 'min:0', 'max:5'],
-            'intelecto' => ['required', 'integer', 'min:0', 'max:5'],
-            'presenca' => ['required', 'integer', 'min:0', 'max:5'],
-            'vigor' => ['required', 'integer', 'min:0', 'max:5'],
+            'agi' => ['required', 'integer', 'min:0', 'max:3'],
+            'forca' => ['required', 'integer', 'min:0', 'max:3'],
+            'intelecto' => ['required', 'integer', 'min:0', 'max:3'],
+            'presenca' => ['required', 'integer', 'min:0', 'max:3'],
+            'vigor' => ['required', 'integer', 'min:0', 'max:3'],
         ]);
+
+        $totalAtributos =
+            $validated['agi'] +
+            $validated['forca'] +
+            $validated['intelecto'] +
+            $validated['presenca'] +
+            $validated['vigor'];
+
+    if ($totalAtributos !== 9) {
+        return back()
+            ->withErrors([
+                'attributes' => 'A soma dos cinco atributos deve ser igual a 9.',
+            ])
+            ->withInput();
+    }
 
         $character->update($validated);
 

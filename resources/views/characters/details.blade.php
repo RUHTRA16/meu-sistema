@@ -1,4 +1,3 @@
-```blade
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -123,6 +122,10 @@
 
         <h2>Etapa 3 — Atributos do personagem</h2>
 
+        @error('attributes')
+            <p>{{ $message }}</p>
+        @enderror
+
         <p>
             Distribua os valores dos atributos conforme as regras
             que implementaremos para o sistema de RPG.
@@ -136,7 +139,7 @@
                 id="agi"
                 name="agi"
                 min="0"
-                max="5"
+                max="3"
                 value="{{ old('agi', $character->agi) }}"
                 required
             >
@@ -156,7 +159,7 @@
                 id="forca"
                 name="forca"
                 min="0"
-                max="5"
+                max="3"
                 value="{{ old('forca', $character->forca) }}"
                 required
             >
@@ -176,7 +179,7 @@
                 id="intelecto"
                 name="intelecto"
                 min="0"
-                max="5"
+                max="3"
                 value="{{ old('intelecto', $character->intelecto) }}"
                 required
             >
@@ -196,7 +199,7 @@
                 id="presenca"
                 name="presenca"
                 min="0"
-                max="5"
+                max="3"
                 value="{{ old('presenca', $character->presenca) }}"
                 required
             >
@@ -216,7 +219,7 @@
                 id="vigor"
                 name="vigor"
                 min="0"
-                max="5"
+                max="3"
                 value="{{ old('vigor', $character->vigor) }}"
                 required
             >
@@ -224,6 +227,11 @@
             @error('vigor')
                 <p>{{ $message }}</p>
             @enderror
+        </div>
+      
+        <div>
+            <h3>Total dos atributos: <span id="total-atributos">0</span> / 9</h3>
+            <p id="mensagem-atributos">Calculando...</p>
         </div>
 
         <hr>
@@ -244,3 +252,54 @@
     </p>
 </body>
 </html>
+
+
+<script>
+    const camposAtributos = [
+        'agi',
+        'forca',
+        'intelecto',
+        'presenca',
+        'vigor'
+    ];
+
+    const totalAtributos = document.getElementById('total-atributos');
+    const mensagemAtributos = document.getElementById('mensagem-atributos');
+
+    function atualizarTotalAtributos() {
+        let total = 0;
+
+        camposAtributos.forEach(function (atributo) {
+            const campo = document.querySelector('[name="' + atributo + '"]');
+
+            if (campo) {
+                total += Number(campo.value) || 0;
+            }
+        });
+
+        totalAtributos.textContent = total;
+
+        if (total === 9) {
+            mensagemAtributos.textContent = 'Distribuição válida!';
+            mensagemAtributos.style.color = 'green';
+        } else {
+            mensagemAtributos.textContent =
+                'A soma deve ser 9. ' +
+                (total < 9
+                    ? 'Faltam ' + (9 - total) + ' ponto(s).'
+                    : 'Você ultrapassou ' + (total - 9) + ' ponto(s).');
+
+            mensagemAtributos.style.color = 'red';
+        }
+    }
+
+    camposAtributos.forEach(function (atributo) {
+        const campo = document.querySelector('[name="' + atributo + '"]');
+
+        if (campo) {
+            campo.addEventListener('input', atualizarTotalAtributos);
+        }
+    });
+
+    atualizarTotalAtributos();
+</script>
