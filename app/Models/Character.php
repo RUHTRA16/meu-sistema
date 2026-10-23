@@ -20,12 +20,16 @@ class Character extends Model
         'intelecto',
         'presenca',
         'vigor',
+        'character_class',
+        'origin',
+        'nex',
     ];
 
-    protected function casts(): array
+        protected function casts(): array
     {
         return [
             'age' => 'integer',
+            'nex' => 'integer',
         ];
     }
 

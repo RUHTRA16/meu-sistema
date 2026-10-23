@@ -7,6 +7,7 @@ use App\Models\Character;
 use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
+use Illuminate\Validation\Rule;
 
 class CharacterController extends Controller
 {
@@ -36,7 +37,6 @@ class CharacterController extends Controller
         ])->with('success', 'Personagem salvo com sucesso!');
     }
 
-    
     public function details(
         Campaign $campaign,
         Character $character
@@ -52,12 +52,11 @@ class CharacterController extends Controller
         ));
     }
 
-    
     public function updateDetails(
         Request $request,
         Campaign $campaign,
         Character $character
-        ): RedirectResponse {
+    ): RedirectResponse {
         abort_unless(
             $character->campaign_id === $campaign->id,
             404
@@ -69,6 +68,18 @@ class CharacterController extends Controller
             'appearance' => ['nullable', 'string', 'max:5000'],
             'personality' => ['nullable', 'string', 'max:5000'],
             'backstory' => ['nullable', 'string', 'max:5000'],
+
+            'character_class' => [
+                'required',
+                'string',
+                Rule::in([
+                    'Combatente',
+                    'Especialista',
+                    'Ocultista',
+                ]),
+            ],
+
+            'origin' => ['required', 'string', 'max:100'],
 
             'agi' => ['required', 'integer', 'min:0', 'max:3'],
             'forca' => ['required', 'integer', 'min:0', 'max:3'],
@@ -92,6 +103,8 @@ class CharacterController extends Controller
                 ->withInput();
         }
 
+        $validated['nex'] = 5;
+
         $character->update($validated);
 
         return redirect()
@@ -102,23 +115,22 @@ class CharacterController extends Controller
             ->with('success', 'Detalhes do personagem salvos com sucesso!');
     }
 
+    public function review(
+        Campaign $campaign,
+        Character $character
+    ): View {
+        abort_unless(
+            $character->campaign_id === $campaign->id,
+            404
+        );
 
-            public function review(
-            Campaign $campaign,
-            Character $character
-        ): View {
-            abort_unless(
-                $character->campaign_id === $campaign->id,
-                404
-            );
+        return view('characters.review', compact(
+            'campaign',
+            'character'
+        ));
+    }
 
-            return view('characters.review', compact(
-                'campaign',
-                'character'
-            ));
-        }
-   
-        public function confirm(
+    public function confirm(
         Campaign $campaign,
         Character $character
     ): RedirectResponse {
@@ -138,6 +150,13 @@ class CharacterController extends Controller
 
         if (
             empty($character->name) ||
+            !in_array($character->character_class, [
+                'Combatente',
+                'Especialista',
+                'Ocultista',
+            ], true) ||
+            empty($character->origin) ||
+            $character->nex !== 5 ||
             $character->agi === null ||
             $character->forca === null ||
             $character->intelecto === null ||
@@ -152,7 +171,7 @@ class CharacterController extends Controller
                 ])
                 ->with(
                     'error',
-                    'Não foi possível confirmar a ficha. Confira o nome e distribua exatamente 9 pontos entre os cinco atributos.'
+                    'Não foi possível confirmar a ficha. Confira o nome, a classe, a origem, o NEX e a distribuição dos atributos.'
                 );
         }
 
@@ -183,5 +202,4 @@ class CharacterController extends Controller
             ->route('home')
             ->with('success', 'Personagem excluído com sucesso!');
     }
-
 }

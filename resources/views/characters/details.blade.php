@@ -1,4 +1,3 @@
-
 @extends('layouts.app')
 
 @section('title', 'Ficha do personagem | RPG Paranormal')
@@ -34,6 +33,11 @@
 
             <div class="creation-step" id="step-indicator-3">
                 <span>03</span>
+                <p>Classe e origem</p>
+            </div>
+
+            <div class="creation-step" id="step-indicator-4">
+                <span>04</span>
                 <p>Atributos</p>
             </div>
         </div>
@@ -83,7 +87,7 @@
 
         {{-- ETAPA 1: IDENTIDADE --}}
         <section class="card creation-panel" id="step-1">
-            <span class="eyebrow">Etapa 01 de 03</span>
+            <span class="eyebrow">Etapa 01 de 04</span>
             <h2>Identidade</h2>
 
             <label for="name">Nome do personagem</label>
@@ -117,7 +121,7 @@
 
         {{-- ETAPA 2: HISTÓRIA E APARÊNCIA --}}
         <section class="card creation-panel" id="step-2" hidden>
-            <span class="eyebrow">Etapa 02 de 03</span>
+            <span class="eyebrow">Etapa 02 de 04</span>
             <h2>História e aparência</h2>
 
             <label for="appearance">Aparência física</label>
@@ -160,15 +164,88 @@
             @enderror
         </section>
 
-        {{-- ETAPA 3: ATRIBUTOS --}}
+        {{-- ETAPA 3: CLASSE E ORIGEM --}}
         <section class="card creation-panel" id="step-3" hidden>
-            <span class="eyebrow">Etapa 03 de 03</span>
+            <span class="eyebrow">Etapa 03 de 04</span>
+            <h2>Classe e origem</h2>
+
+            <p>
+                Escolha a classe do agente e informe sua origem.
+                Esses dados serão utilizados nas próximas etapas da ficha.
+            </p>
+
+            <label for="character_class">Classe do personagem</label>
+            <select
+                id="character_class"
+                name="character_class"
+                required
+            >
+                <option value="">Selecione uma classe</option>
+
+                <option
+                    value="Combatente"
+                    {{ old('character_class', $character->character_class) === 'Combatente' ? 'selected' : '' }}
+                >
+                    Combatente
+                </option>
+
+                <option
+                    value="Especialista"
+                    {{ old('character_class', $character->character_class) === 'Especialista' ? 'selected' : '' }}
+                >
+                    Especialista
+                </option>
+
+                <option
+                    value="Ocultista"
+                    {{ old('character_class', $character->character_class) === 'Ocultista' ? 'selected' : '' }}
+                >
+                    Ocultista
+                </option>
+            </select>
+
+            @error('character_class')
+                <p class="error">{{ $message }}</p>
+            @enderror
+
+            <label for="origin">Origem do personagem</label>
+            <input
+                type="text"
+                id="origin"
+                name="origin"
+                value="{{ old('origin', $character->origin) }}"
+                maxlength="100"
+                placeholder="Informe a origem do personagem"
+                required
+            >
+
+            @error('origin')
+                <p class="error">{{ $message }}</p>
+            @enderror
+
+            <div class="attribute-total">
+                <h3>Nível de Exposição Paranormal (NEX)</h3>
+
+                <p>
+                    <strong>5%</strong> — NEX inicial da criação padrão.
+                </p>
+
+                <p>
+                    O NEX será configurado automaticamente pelo sistema.
+                </p>
+            </div>
+        </section>
+
+        {{-- ETAPA 4: ATRIBUTOS --}}
+        <section class="card creation-panel" id="step-4" hidden>
+            <span class="eyebrow">Etapa 04 de 04</span>
             <h2>Atributos do personagem</h2>
 
             <p>
                 Distribua os pontos entre os cinco atributos.
                 Nesta versão, o total permitido é 9, com valores de 0 a 3
-                por atributo.
+                por atributo. Essa regra provisória será conferida com o
+                livro antes de finalizarmos as regras de criação.
             </p>
 
             @error('attributes')
@@ -318,21 +395,23 @@
         const panels = [
             document.getElementById('step-1'),
             document.getElementById('step-2'),
-            document.getElementById('step-3')
+            document.getElementById('step-3'),
+            document.getElementById('step-4')
         ];
 
         const indicators = [
             document.getElementById('step-indicator-1'),
             document.getElementById('step-indicator-2'),
-            document.getElementById('step-indicator-3')
+            document.getElementById('step-indicator-3'),
+            document.getElementById('step-indicator-4')
         ];
 
         const previousButton = document.getElementById('previous-step');
         const nextButton = document.getElementById('next-step');
         const saveButton = document.getElementById('save-character');
+        const currentStepInput = document.getElementById('current_step');
 
         let currentStep = 0;
-        const currentStepInput = document.getElementById('current_step');
 
         function showStep(step) {
             currentStep = step;
@@ -431,9 +510,10 @@
         }
 
         camposAtributos.forEach(function (atributo) {
-            const campo = document.getElementById(atributo);
-
-            campo.addEventListener('input', atualizarTotalAtributos);
+            document.getElementById(atributo).addEventListener(
+                'input',
+                atualizarTotalAtributos
+            );
         });
 
         const erros = @json($errors->keys());
@@ -447,6 +527,11 @@
         ) {
             etapaInicial = 1;
         } else if (
+            erros.includes('character_class') ||
+            erros.includes('origin')
+        ) {
+            etapaInicial = 2;
+        } else if (
             erros.includes('agi') ||
             erros.includes('forca') ||
             erros.includes('intelecto') ||
@@ -454,18 +539,16 @@
             erros.includes('vigor') ||
             erros.includes('attributes')
         ) {
-            etapaInicial = 2;
+            etapaInicial = 3;
         } else if (
             erros.includes('name') ||
             erros.includes('age')
         ) {
             etapaInicial = 0;
         } else {
-            const etapaAnterior = Number(
-                document.getElementById('current_step').value
-            );
+            const etapaAnterior = Number(currentStepInput.value);
 
-            if (etapaAnterior >= 1 && etapaAnterior <= 3) {
+            if (etapaAnterior >= 1 && etapaAnterior <= panels.length) {
                 etapaInicial = etapaAnterior - 1;
             }
         }
