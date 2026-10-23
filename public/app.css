@@ -1,0 +1,1321 @@
+
+/* ========================================
+   RPG PARANORMAL — TEMA PRINCIPAL
+   ======================================== */
+
+:root {
+    color-scheme: dark;
+
+    --bg: #080808;
+    --surface: #111111;
+    --surface-hover: #191919;
+    --border: #2b2b2b;
+
+    --red: #b51f2b;
+    --red-hover: #d42b38;
+    --red-dark: #67141c;
+    --red-glow: rgba(181, 31, 43, 0.15);
+
+    --text: #f2f2f2;
+    --text-muted: #a3a3a3;
+
+    --radius: 12px;
+}
+
+/* Base */
+
+* {
+    box-sizing: border-box;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    margin: 0;
+    min-height: 100vh;
+    background:
+        radial-gradient(
+            ellipse at 50% 0%,
+            rgba(130, 12, 25, 0.16),
+            transparent 50%
+        ),
+        var(--bg);
+    color: var(--text);
+    font-family: Arial, Helvetica, sans-serif;
+    line-height: 1.7;
+}
+
+::selection {
+    background: var(--red);
+    color: #ffffff;
+}
+
+h1,
+h2,
+h3 {
+    color: var(--text);
+    line-height: 1.25;
+    letter-spacing: -0.03em;
+}
+
+h1 {
+    margin-bottom: 8px;
+    font-size: clamp(2rem, 5vw, 3.2rem);
+}
+
+h2 {
+    font-size: 1.55rem;
+}
+
+h3 {
+    font-size: 1.1rem;
+}
+
+p {
+    color: var(--text-muted);
+}
+
+strong {
+    color: var(--text);
+}
+
+a {
+    color: #ff646e;
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+a:hover {
+    color: #ff9ba1;
+}
+
+/* Área principal */
+
+.container {
+    width: min(1100px, calc(100% - 40px));
+    margin: 0 auto;
+    padding: 44px 0;
+}
+
+.page-header {
+    margin-bottom: 36px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--border);
+}
+
+.page-header > a {
+    display: inline-block;
+}
+
+.page-header p {
+    margin-top: 8px;
+}
+
+.eyebrow {
+    display: inline-block;
+    margin-bottom: 10px;
+    color: #ed5964;
+    font-size: 0.76rem;
+    font-weight: bold;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+}
+
+/* Cartões */
+
+.card {
+    margin-bottom: 22px;
+    padding: 28px;
+    background: linear-gradient(145deg, #161616, #0e0e0e);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: 0 14px 35px rgba(0, 0, 0, 0.22);
+    transition:
+        border-color 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+.card:hover {
+    border-color: #493034;
+    box-shadow: 0 14px 35px rgba(0, 0, 0, 0.28);
+}
+
+.card h2,
+.card h3 {
+    margin-top: 0;
+}
+
+.card > :last-child {
+    margin-bottom: 0;
+}
+
+/* Formulários */
+
+label {
+    display: block;
+    margin-bottom: 8px;
+    color: var(--text);
+    font-weight: 600;
+}
+
+input,
+textarea,
+select {
+    display: block;
+    width: 100%;
+    margin: 0 0 20px;
+    padding: 13px 15px;
+    background: #090909;
+    color: var(--text);
+    border: 1px solid #383838;
+    border-radius: 8px;
+    font: inherit;
+    transition:
+        border-color 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+input::placeholder,
+textarea::placeholder {
+    color: #777777;
+}
+
+input:hover,
+textarea:hover,
+select:hover {
+    border-color: #555555;
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+    outline: none;
+    border-color: var(--red);
+    box-shadow: 0 0 0 3px var(--red-glow);
+}
+
+textarea {
+    min-height: 110px;
+    resize: vertical;
+}
+
+input[type="number"] {
+    max-width: 180px;
+}
+
+/* Botões */
+
+button,
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 44px;
+    margin: 4px 8px 4px 0;
+    padding: 11px 18px;
+    background: var(--red);
+    color: #ffffff;
+    border: 1px solid var(--red);
+    border-radius: 8px;
+    font: inherit;
+    font-weight: bold;
+    text-align: center;
+    cursor: pointer;
+    transition:
+        background 0.2s ease,
+        border-color 0.2s ease,
+        transform 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+button:hover,
+.btn:hover {
+    background: var(--red-hover);
+    border-color: var(--red-hover);
+    color: #ffffff;
+    box-shadow: 0 5px 18px rgba(181, 31, 43, 0.18);
+    transform: translateY(-1px);
+}
+
+button:focus-visible,
+.btn:focus-visible {
+    outline: 2px solid #ff858d;
+    outline-offset: 3px;
+}
+
+.btn-secondary {
+    background: #1a1a1a;
+    border-color: #414141;
+}
+
+.btn-secondary:hover {
+    background: #292929;
+    border-color: #666666;
+}
+
+/* Separadores e mensagens */
+
+hr {
+    margin: 28px 0;
+    border: 0;
+    border-top: 1px solid var(--border);
+}
+
+.alert {
+    margin-bottom: 20px;
+    padding: 16px 18px;
+    background: #211012;
+    border: 1px solid var(--red-dark);
+    border-left: 4px solid var(--red);
+    border-radius: 8px;
+    color: #ffb4b9;
+}
+
+.alert p {
+    color: #ffb4b9;
+}
+
+.error {
+    margin-top: -12px;
+    margin-bottom: 16px;
+    color: #ff747e;
+    font-size: 0.9rem;
+}
+
+ul {
+    color: var(--text-muted);
+    padding-left: 24px;
+}
+
+/* Atributos */
+
+.attributes-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+}
+
+.attribute-card {
+    min-width: 0;
+    padding: 20px;
+    background: linear-gradient(145deg, #101010, #0a0a0a);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    transition:
+        border-color 0.2s ease,
+        background 0.2s ease;
+}
+
+.attribute-card:hover {
+    background: var(--surface-hover);
+    border-color: var(--red-dark);
+}
+
+.attribute-card h2 {
+    margin-bottom: 0;
+    color: #ff646e;
+    font-size: 2rem;
+}
+
+.attribute-card h3 {
+    margin-bottom: 10px;
+}
+
+.attribute-card input {
+    margin-bottom: 0;
+}
+
+.attribute-total {
+    margin: 24px 0 0;
+    padding: 20px;
+    background: linear-gradient(145deg, #211012, #140c0d);
+    border: 1px solid var(--red-dark);
+    border-radius: 10px;
+}
+
+.attribute-total h3 {
+    margin-top: 0;
+}
+
+.attribute-total strong {
+    color: #ff646e;
+}
+
+/* Navegação e rodapé */
+
+nav {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px;
+    margin-top: 24px;
+}
+
+.main-nav {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.main-nav .btn {
+    margin: 0;
+}
+
+footer {
+    margin-top: 36px;
+    padding-top: 10px;
+    border-top: 1px solid var(--border);
+    text-align: center;
+}
+
+footer p {
+    font-size: 0.9rem;
+}
+
+/* Telas menores */
+
+@media (max-width: 600px) {
+    .container {
+        width: calc(100% - 24px);
+        padding: 26px 0;
+    }
+
+    .page-header {
+        margin-bottom: 24px;
+    }
+
+    .card {
+        padding: 19px;
+        margin-bottom: 16px;
+    }
+
+    .attributes-grid {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+
+    button,
+    .btn {
+        max-width: 100%;
+        margin-bottom: 8px;
+    }
+
+    input[type="number"] {
+        max-width: 100%;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        scroll-behavior: auto !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+/* Personagens na página inicial */
+
+.character-card {
+    margin: 16px 0;
+    padding: 20px;
+    background: #0b0b0b;
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--red-dark);
+    border-radius: 10px;
+    transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+.character-card:hover {
+    background: #141414;
+    border-left-color: var(--red);
+}
+
+.character-card h3 {
+    margin-top: 0;
+}
+
+.character-status {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    margin: 14px 0;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+}
+
+.status-badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    font-size: 0.78rem;
+    font-weight: bold;
+}
+
+.status-confirmed {
+    color: #a5e6b0;
+    background: #102015;
+    border-color: #285b35;
+}
+
+.status-draft {
+    color: #ffd27d;
+    background: #241b0c;
+    border-color: #63491b;
+}
+
+/* Painel de estatísticas */
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px;
+    margin-bottom: 24px;
+}
+
+.stat-card {
+    padding: 24px;
+    background: linear-gradient(145deg, #171010, #0d0d0d);
+    border: 1px solid var(--border);
+    border-top: 2px solid var(--red-dark);
+    border-radius: var(--radius);
+}
+
+.stat-card .eyebrow {
+    margin-bottom: 4px;
+}
+
+.stat-card h2 {
+    margin: 8px 0;
+    color: #ff646e;
+    font-size: 2.4rem;
+}
+
+.stat-card p {
+    margin-bottom: 0;
+}
+
+@media (max-width: 600px) {
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Status das campanhas */
+
+.status-campaign {
+    color: #ff9299;
+    background: #241013;
+    border-color: #71303a;
+}
+
+/* Campos com erro de validação */
+
+.input-error {
+    border-color: #ff5964;
+    box-shadow: 0 0 0 2px rgba(255, 89, 100, 0.12);
+}
+
+.input-error:focus {
+    border-color: #ff5964;
+    box-shadow: 0 0 0 3px rgba(255, 89, 100, 0.2);
+}
+
+/* Progresso da criação de personagem */
+
+.creation-steps {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+    margin-top: 20px;
+}
+
+.creation-step {
+    padding: 16px 12px;
+    background: #0b0b0b;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    text-align: center;
+}
+
+.creation-step > span {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border: 1px solid #444;
+    border-radius: 50%;
+    color: var(--text-muted);
+    font-weight: bold;
+}
+
+.creation-step p {
+    margin: 10px 0 0;
+    font-size: 0.9rem;
+}
+
+.creation-step.active {
+    background: #211012;
+    border-color: var(--red-dark);
+}
+
+/* Etapas concluídas na criação do personagem */
+
+.creation-step.completed {
+    border-color: #6d252b;
+    background: #160d0e;
+}
+
+.creation-step.completed > span {
+    border-color: #b51f2b;
+    background: #b51f2b;
+    color: #ffffff;
+}
+
+.creation-step.completed p {
+    color: #f0c4c7;
+}
+
+.creation-step.active > span {
+    background: var(--red);
+    border-color: var(--red);
+    color: white;
+}
+
+.creation-step.active p {
+    color: var(--text);
+}
+
+@media (max-width: 600px) {
+    .creation-steps {
+        grid-template-columns: 1fr;
+    }
+
+    .creation-step {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        text-align: left;
+    }
+
+    .creation-step p {
+        margin: 0;
+    }
+}
+
+/* ========================================
+   AVISOS DO SISTEMA — RPG PARANORMAL
+   ======================================== */
+
+.alert {
+    padding: 16px 20px;
+    margin: 20px 0;
+    border: 1px solid #6d252b;
+    border-left: 4px solid #b51f2b;
+    border-radius: 6px;
+    background: linear-gradient(135deg, #1a0d0f, #100b0c);
+    color: #f0c4c7;
+    font-size: 0.95rem;
+    line-height: 1.6;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+}
+
+.alert::before {
+    content: "⚠ ";
+    font-weight: bold;
+    color: #d42b38;
+}
+
+/* ========================================
+   CENTRAL DE OPERAÇÕES
+   ======================================== */
+
+.operations-header {
+    position: relative;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 30px;
+    overflow: hidden;
+    border-color: #492025;
+    background:
+        radial-gradient(
+            ellipse at 10% 50%,
+            rgba(181, 31, 43, 0.15),
+            transparent 65%
+        ),
+        linear-gradient(135deg, #151112, #0b0b0b);
+}
+
+.operations-header-content {
+    flex: 1;
+}
+
+.operations-header h2 {
+    margin-top: 12px;
+    margin-bottom: 12px;
+    font-size: clamp(1.7rem, 4vw, 2.5rem);
+    letter-spacing: -0.04em;
+}
+
+.operations-header p {
+    max-width: 600px;
+    color: #b8afb0;
+    line-height: 1.8;
+}
+
+.operations-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    margin-top: 12px;
+    padding: 9px 12px;
+    border: 1px solid #343034;
+    border-radius: 4px;
+    background: rgba(0, 0, 0, 0.25);
+    color: #d6cdd0;
+    font-size: 0.75rem;
+    letter-spacing: 0.08em;
+}
+
+.status-indicator {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #b51f2b;
+    box-shadow: 0 0 10px rgba(181, 31, 43, 0.8);
+}
+
+.operations-classification {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    min-width: 150px;
+    padding: 18px;
+    border: 1px solid #492025;
+    background: rgba(0, 0, 0, 0.25);
+    text-align: center;
+}
+
+.operations-classification span {
+    color: #92878a;
+    font-size: 0.65rem;
+    letter-spacing: 0.1em;
+}
+
+.operations-classification strong {
+    color: #d42b38;
+    font-size: 0.9rem;
+    letter-spacing: 0.08em;
+}
+
+@media (max-width: 600px) {
+    .operations-header {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .operations-classification {
+        min-width: 0;
+    }
+}
+
+/* ========================================
+   ARQUIVOS DE CAMPANHA
+   ======================================== */
+
+.card {
+    position: relative;
+}
+
+.card:has(> h2) {
+    transition:
+        border-color 0.25s ease,
+        box-shadow 0.25s ease;
+}
+
+.card:has(> h2):hover {
+    border-color: #54242a;
+    box-shadow: 0 8px 28px rgba(0, 0, 0, 0.25);
+}
+
+/* Cartão individual de personagem */
+
+.character-card {
+    position: relative;
+    margin: 18px 0;
+    padding: 20px;
+    border: 1px solid #30272a;
+    border-left: 3px solid #6d252b;
+    border-radius: 5px;
+    background:
+        linear-gradient(110deg, rgba(181, 31, 43, 0.06), transparent 55%),
+        #101010;
+    transition:
+        border-color 0.2s ease,
+        transform 0.2s ease;
+}
+
+.character-card:hover {
+    border-left-color: #d42b38;
+    border-color: #492025;
+    transform: translateY(-2px);
+}
+
+.character-card h3 {
+    margin-top: 0;
+    margin-bottom: 16px;
+    color: #f1e9ea;
+    font-size: 1.15rem;
+}
+
+/* Separadores dentro dos arquivos */
+
+.card hr {
+    margin: 24px 0;
+    border: 0;
+    border-top: 1px solid #30272a;
+}
+
+/* Botões e ações */
+
+.character-card .btn,
+.character-card form,
+.card > form {
+    margin-top: 10px;
+}
+
+.character-card form,
+.card > form {
+    display: inline-block;
+}
+
+.card > .btn,
+.character-card .btn,
+.character-card form button,
+.card > form button {
+    font-size: 0.85rem;
+}
+
+/* Em telas pequenas, organizar ações verticalmente */
+
+@media (max-width: 600px) {
+    .character-card .btn,
+    .character-card form,
+    .card > form {
+        display: block;
+        width: 100%;
+    }
+
+    .character-card form button,
+    .card > form button {
+        width: 100%;
+    }
+}
+
+/* ========================================
+   STATUS — IDENTIFICAÇÃO DE ARQUIVOS
+   ======================================== */
+
+.character-status {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin: 14px 0;
+    color: #aaa0a2;
+    font-size: 0.85rem;
+}
+
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 6px 10px;
+    border: 1px solid;
+    border-radius: 3px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+}
+
+/* Campanha em preparação */
+
+.status-campaign {
+    color: #d8b978;
+    border-color: #66512b;
+    background: rgba(150, 112, 35, 0.12);
+}
+
+/* Ficha ainda em desenvolvimento */
+
+.status-draft {
+    color: #c5b6c9;
+    border-color: #514052;
+    background: rgba(100, 65, 105, 0.14);
+}
+
+/* Ficha confirmada */
+
+.status-confirmed {
+    color: #a8d8b4;
+    border-color: #315b3b;
+    background: rgba(47, 112, 63, 0.14);
+}
+
+/* Pequeno marcador antes do texto */
+
+.status-badge::before {
+    content: "";
+    width: 6px;
+    height: 6px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    background: currentColor;
+    box-shadow: 0 0 7px currentColor;
+}
+
+/* ========================================
+   BOTÕES — CENTRAL DE OPERAÇÕES
+   ======================================== */
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 42px;
+    padding: 10px 16px;
+    border: 1px solid #8e202a;
+    border-radius: 4px;
+    background: linear-gradient(135deg, #a51e29, #72151d);
+    color: #ffffff;
+    font-size: 0.88rem;
+    font-weight: 600;
+    text-align: center;
+    text-decoration: none;
+    cursor: pointer;
+    transition:
+        background 0.2s ease,
+        border-color 0.2s ease,
+        box-shadow 0.2s ease,
+        transform 0.2s ease;
+}
+
+.btn:hover {
+    border-color: #e13a46;
+    background: linear-gradient(135deg, #c42a36, #8e1822);
+    box-shadow: 0 4px 14px rgba(181, 31, 43, 0.2);
+    transform: translateY(-1px);
+}
+
+.btn:focus-visible {
+    outline: 2px solid #f0a0a5;
+    outline-offset: 3px;
+}
+
+.btn:active {
+    transform: translateY(0);
+}
+
+/* Botões secundários: ações de apoio */
+
+.btn.btn-secondary {
+    border-color: #393236;
+    background: #171516;
+    color: #d8ced0;
+    box-shadow: none;
+}
+
+.btn.btn-secondary:hover {
+    border-color: #6d252b;
+    background: #211719;
+    color: #ffffff;
+}
+
+/* Evita que os botões de formulário fiquem desalinhados */
+
+button.btn {
+    font-family: inherit;
+    line-height: 1.2;
+}
+
+button:disabled {
+    cursor: not-allowed;
+    opacity: 0.55;
+}
+
+/* ========================================
+   PAINEL DE MONITORAMENTO
+   ======================================== */
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px;
+    margin: 24px 0;
+}
+
+.stat-card {
+    position: relative;
+    overflow: hidden;
+    padding: 24px;
+    border: 1px solid #35282b;
+    border-top: 2px solid #6d252b;
+    border-radius: 5px;
+    background:
+        linear-gradient(135deg, rgba(181, 31, 43, 0.08), transparent 65%),
+        #111010;
+    transition: border-color 0.25s ease;
+}
+
+.stat-card:hover {
+    border-color: #6d252b;
+}
+
+.stat-card .eyebrow {
+    color: #a99b9e;
+    font-size: 0.72rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+}
+
+.stat-card h2 {
+    margin: 14px 0 8px;
+    color: #f2e9ea;
+    font-size: clamp(2rem, 5vw, 3rem);
+    font-variant-numeric: tabular-nums;
+    line-height: 1;
+}
+
+.stat-card p {
+    margin-bottom: 0;
+    color: #968b8d;
+    font-size: 0.85rem;
+}
+
+/* Ajuste para celulares */
+
+@media (max-width: 480px) {
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .stat-card {
+        padding: 20px;
+    }
+}
+
+/* ========================================
+   CABEÇALHO — RPG PARANORMAL
+   ======================================== */
+
+.page-header {
+    position: relative;
+    margin-bottom: 30px;
+    padding: 26px 0 24px;
+    border-bottom: 1px solid #382326;
+}
+
+.page-header > a {
+    display: inline-block;
+    color: inherit;
+    text-decoration: none;
+}
+
+.page-header h1 {
+    margin: 8px 0;
+    color: #f3eded;
+    font-size: clamp(1.8rem, 4vw, 2.6rem);
+    font-weight: 800;
+    letter-spacing: -0.045em;
+}
+
+.page-header > a:hover h1 {
+    color: #e8c6c9;
+}
+
+.page-header > p {
+    margin: 8px 0 20px;
+    color: #a99da0;
+    font-size: 0.92rem;
+    letter-spacing: 0.025em;
+}
+
+.main-nav {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 18px;
+    padding-top: 16px;
+    border-top: 1px solid #292326;
+}
+
+.main-nav .btn {
+    min-height: 38px;
+    padding: 9px 14px;
+    font-size: 0.82rem;
+}
+
+@media (max-width: 480px) {
+    .page-header {
+        padding-top: 18px;
+    }
+
+    .main-nav {
+        align-items: stretch;
+    }
+
+    .main-nav .btn {
+        flex: 1;
+    }
+}
+
+/* ========================================
+   FORMULÁRIOS — ARQUIVOS DE AGENTES
+   ======================================== */
+
+input,
+textarea,
+select {
+    border: 1px solid #393034;
+    border-radius: 4px;
+    background-color: #0d0c0d;
+    color: #eee6e7;
+    transition:
+        border-color 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+    border-color: #a52a34;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(181, 31, 43, 0.13);
+}
+
+input::placeholder,
+textarea::placeholder {
+    color: #766d70;
+}
+
+label {
+    color: #d9ced0;
+    font-weight: 600;
+}
+
+input:disabled,
+textarea:disabled,
+select:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+input[type="number"] {
+    font-variant-numeric: tabular-nums;
+}
+
+textarea {
+    min-height: 110px;
+    resize: vertical;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        scroll-behavior: auto !important;
+        transition-duration: 0.01ms !important;
+        animation-duration: 0.01ms !important;
+    }
+}
+
+
+/* ========================================
+   DOSSIÊ DO AGENTE — FICHA E ATRIBUTOS
+   ======================================== */
+
+.attributes-grid {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 12px;
+    margin: 22px 0;
+}
+
+.attribute-card {
+    position: relative;
+    overflow: hidden;
+    padding: 18px 12px;
+    border: 1px solid #38282c;
+    border-top: 2px solid #8e202a;
+    border-radius: 4px;
+    background:
+        linear-gradient(
+            180deg,
+            rgba(181, 31, 43, 0.09),
+            transparent 75%
+        ),
+        #101010;
+    text-align: center;
+    transition:
+        border-color 0.2s ease,
+        transform 0.2s ease;
+}
+
+.attribute-card:hover {
+    border-color: #8e202a;
+    transform: translateY(-3px);
+}
+
+.attribute-card .eyebrow {
+    color: #d42b38;
+    font-size: 0.72rem;
+    letter-spacing: 0.12em;
+}
+
+.attribute-card h3 {
+    margin: 12px 0;
+    color: #bdb1b4;
+    font-size: 0.82rem;
+    font-weight: 500;
+}
+
+.attribute-card h2 {
+    margin: 8px 0 0;
+    color: #f5eeee;
+    font-size: 2.3rem;
+    font-weight: 800;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+}
+
+/* Informações textuais do dossiê */
+
+.card > p {
+    line-height: 1.8;
+    overflow-wrap: anywhere;
+}
+
+.card > p strong {
+    color: #e2d5d7;
+}
+
+/* Navegação após a ficha */
+
+body .container > nav:last-of-type {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin: 24px 0;
+}
+
+/* Ajustes para telas médias */
+
+@media (max-width: 760px) {
+    .attributes-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}
+
+/* Ajustes para celulares */
+
+@media (max-width: 420px) {
+    .attributes-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .attribute-card {
+        padding: 16px 10px;
+    }
+
+    .attribute-card h2 {
+        font-size: 2rem;
+    }
+
+    body .container > nav:last-of-type .btn {
+        flex: 1;
+    }
+}
+
+/* ========================================
+   REGISTROS DO DOSSIÊ
+   ======================================== */
+
+.card .eyebrow {
+    display: inline-block;
+    color: #c64a53;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+}
+
+.card > h2 {
+    color: #f0e8e9;
+    letter-spacing: -0.02em;
+}
+
+.card > p {
+    color: #b9afb1;
+    line-height: 1.85;
+}
+
+.card > p strong {
+    color: #e7dadd;
+}
+
+/* Separação visual entre os registros */
+
+.card + .card {
+    margin-top: 18px;
+}
+
+/* Texto de história, aparência e personalidade */
+
+.card > p:not(:has(strong)) {
+    overflow-wrap: anywhere;
+    white-space: pre-line;
+}
+
+/* Situação da ficha */
+
+.card .alert strong {
+    color: #f0c4c7;
+}
+
+.card .alert p {
+    margin-bottom: 0;
+    color: #c8b9bb;
+}
+
+/* Navegação final da revisão */
+
+body .container > nav:last-of-type {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin: 24px 0;
+}
+
+body .container > nav:last-of-type a {
+    min-width: 150px;
+}
+
+@media (max-width: 480px) {
+    body .container > nav:last-of-type a {
+        flex: 1;
+        min-width: 0;
+    }
+}

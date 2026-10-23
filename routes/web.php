@@ -11,6 +11,11 @@ Route::get('/', [HomeController::class, 'index'])
 Route::get('/campanhas/nova', [CampaignController::class, 'create'])
     ->name('campaigns.create');
 
+    
+Route::delete('/campanhas/{campaign}',[CampaignController::class, 'destroy'])
+    ->name('campaigns.destroy');
+
+
 Route::post('/campanhas', [CampaignController::class, 'store'])
     ->name('campaigns.store');
 
@@ -44,3 +49,8 @@ Route::post(
     '/campanhas/{campaign}/personagens/{character}/confirmar',
     [CharacterController::class, 'confirm']
 )->name('characters.confirm');
+
+Route::delete(
+    '/campanhas/{campaign}/personagens/{character}',
+    [CharacterController::class, 'destroy']
+)->name('characters.destroy');

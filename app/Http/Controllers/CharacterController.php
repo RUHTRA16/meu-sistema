@@ -52,11 +52,12 @@ class CharacterController extends Controller
         ));
     }
 
+    
     public function updateDetails(
         Request $request,
         Campaign $campaign,
         Character $character
-    ): RedirectResponse {
+        ): RedirectResponse {
         abort_unless(
             $character->campaign_id === $campaign->id,
             404
@@ -83,13 +84,13 @@ class CharacterController extends Controller
             $validated['presenca'] +
             $validated['vigor'];
 
-    if ($totalAtributos !== 9) {
-        return back()
-            ->withErrors([
-                'attributes' => 'A soma dos cinco atributos deve ser igual a 9.',
-            ])
-            ->withInput();
-    }
+        if ($totalAtributos !== 9) {
+            return back()
+                ->withErrors([
+                    'attributes' => 'A soma dos cinco atributos deve ser igual a 9.',
+                ])
+                ->withInput();
+        }
 
         $character->update($validated);
 
@@ -100,6 +101,7 @@ class CharacterController extends Controller
             ])
             ->with('success', 'Detalhes do personagem salvos com sucesso!');
     }
+
 
             public function review(
             Campaign $campaign,
@@ -116,7 +118,7 @@ class CharacterController extends Controller
             ));
         }
    
-    public function confirm(
+        public function confirm(
         Campaign $campaign,
         Character $character
     ): RedirectResponse {
@@ -124,6 +126,35 @@ class CharacterController extends Controller
             $character->campaign_id === $campaign->id,
             404
         );
+
+        $character->refresh();
+
+        $totalAtributos =
+            $character->agi +
+            $character->forca +
+            $character->intelecto +
+            $character->presenca +
+            $character->vigor;
+
+        if (
+            empty($character->name) ||
+            $character->agi === null ||
+            $character->forca === null ||
+            $character->intelecto === null ||
+            $character->presenca === null ||
+            $character->vigor === null ||
+            $totalAtributos !== 9
+        ) {
+            return redirect()
+                ->route('characters.details', [
+                    'campaign' => $campaign->id,
+                    'character' => $character->id,
+                ])
+                ->with(
+                    'error',
+                    'Não foi possível confirmar a ficha. Confira o nome e distribua exatamente 9 pontos entre os cinco atributos.'
+                );
+        }
 
         $character->update([
             'creation_status' => 'confirmed',
@@ -135,6 +166,22 @@ class CharacterController extends Controller
                 'character' => $character->id,
             ])
             ->with('success', 'Ficha do personagem confirmada com sucesso!');
+    }
+
+    public function destroy(
+        Campaign $campaign,
+        Character $character
+    ): RedirectResponse {
+        abort_unless(
+            $character->campaign_id === $campaign->id,
+            404
+        );
+
+        $character->delete();
+
+        return redirect()
+            ->route('home')
+            ->with('success', 'Personagem excluído com sucesso!');
     }
 
 }

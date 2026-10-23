@@ -1,35 +1,36 @@
-```blade
-<!DOCTYPE html>
-<html lang="pt-BR">
+@extends('layouts.app')
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+@section('title', 'Revisão da ficha | RPG Paranormal')
 
-    <title>Revisão da ficha</title>
-</head>
+@section('content')
 
-<body>
-    <h1>Revisão da ficha do personagem</h1>
+    <section class="card">
+        <span class="eyebrow">Arquivo confidencial — Revisão</span>
 
-    @if (session('success'))
-        <p>{{ session('success') }}</p>
-    @endif
+        <h2>Ficha do personagem</h2>
 
-    <p>
-        <strong>Campanha:</strong>
-        {{ $campaign->title }}
-    </p>
+        <p>
+            <strong>Campanha:</strong> {{ $campaign->title }}
+        </p>
 
-    <hr>
+        <p>
+            Confira todas as informações antes de confirmar o cadastro
+            do personagem.
+        </p>
 
-    {{-- Identidade do personagem --}}
-    <section>
+        @if (session('success'))
+            <div class="alert">
+                {{ session('success') }}
+            </div>
+        @endif
+    </section>
+
+    <section class="card">
+        <span class="eyebrow">Registro 01</span>
         <h2>Identidade</h2>
 
         <p>
-            <strong>Nome:</strong>
-            {{ $character->name }}
+            <strong>Nome:</strong> {{ $character->name }}
         </p>
 
         <p>
@@ -38,53 +39,54 @@
         </p>
     </section>
 
-    <hr>
-
-    {{-- Atributos do personagem --}}
-    <section>
+    <section class="card">
+        <span class="eyebrow">Registro 02</span>
         <h2>Atributos</h2>
 
-        <ul>
-            <li>
-                <strong>AGI — Agilidade:</strong>
-                {{ $character->agi }}
-            </li>
+        <div class="attributes-grid">
+            <div class="attribute-card">
+                <span class="eyebrow">AGI</span>
+                <h3>Agilidade</h3>
+                <h2>{{ $character->agi }}</h2>
+            </div>
 
-            <li>
-                <strong>FOR — Força:</strong>
-                {{ $character->forca }}
-            </li>
+            <div class="attribute-card">
+                <span class="eyebrow">FOR</span>
+                <h3>Força</h3>
+                <h2>{{ $character->forca }}</h2>
+            </div>
 
-            <li>
-                <strong>INT — Intelecto:</strong>
-                {{ $character->intelecto }}
-            </li>
+            <div class="attribute-card">
+                <span class="eyebrow">INT</span>
+                <h3>Intelecto</h3>
+                <h2>{{ $character->intelecto }}</h2>
+            </div>
 
-            <li>
-                <strong>PRE — Presença:</strong>
-                {{ $character->presenca }}
-            </li>
+            <div class="attribute-card">
+                <span class="eyebrow">PRE</span>
+                <h3>Presença</h3>
+                <h2>{{ $character->presenca }}</h2>
+            </div>
 
-            <li>
-                <strong>VIG — Vigor:</strong>
-                {{ $character->vigor }}
-            </li>
-        </ul>
+            <div class="attribute-card">
+                <span class="eyebrow">VIG</span>
+                <h3>Vigor</h3>
+                <h2>{{ $character->vigor }}</h2>
+            </div>
+        </div>
     </section>
 
-    <hr>
-
-    {{-- Aparência física --}}
-    <section>
-        <h2>Aparência</h2>
+    <section class="card">
+        <span class="eyebrow">Registro 03</span>
+        <h2>Aparência física</h2>
 
         <p>
             {{ $character->appearance ?: 'Ainda não informada.' }}
         </p>
     </section>
 
-    {{-- Personalidade --}}
-    <section>
+    <section class="card">
+        <span class="eyebrow">Registro 04</span>
         <h2>Personalidade</h2>
 
         <p>
@@ -92,29 +94,29 @@
         </p>
     </section>
 
-    {{-- História do personagem --}}
-    <section>
-        <h2>História</h2>
+    <section class="card">
+        <span class="eyebrow">Registro 05</span>
+        <h2>História do personagem</h2>
 
         <p>
             {{ $character->backstory ?: 'Ainda não informada.' }}
         </p>
     </section>
 
-    <hr>
-
-    {{-- Status e confirmação da ficha --}}
-    <section>
+    <section class="card">
+        <span class="eyebrow">Situação do registro</span>
         <h2>Status da ficha</h2>
 
         @if ($character->creation_status === 'confirmed')
-            <p>Confirmada</p>
-            <p>Ficha confirmada!</p>
+            <div class="alert">
+                <strong>Ficha confirmada!</strong>
+                <p>O personagem foi confirmado com sucesso.</p>
+            </div>
         @else
-            <p>Rascunho</p>
+            <p>A ficha ainda está em rascunho.</p>
 
             <form
-                action="/campanhas/{{ $campaign->id }}/personagens/{{ $character->id }}/confirmar"
+                action="{{ url('/campanhas/' . $campaign->id . '/personagens/' . $character->id . '/confirmar') }}"
                 method="POST"
             >
                 @csrf
@@ -126,25 +128,20 @@
         @endif
     </section>
 
-    <hr>
-
-    {{-- Navegação --}}
     <nav>
-        <p>
-            <a href="{{ route('characters.details', [
+        <a
+            href="{{ route('characters.details', [
                 'campaign' => $campaign->id,
                 'character' => $character->id,
-            ]) }}">
-                Voltar e editar
-            </a>
-        </p>
+            ]) }}"
+            class="btn btn-secondary"
+        >
+            Voltar e editar
+        </a>
 
-        <p>
-            <a href="{{ route('home') }}">
-                Voltar para a página inicial
-            </a>
-        </p>
+        <a href="{{ route('home') }}" class="btn">
+            Página inicial
+        </a>
     </nav>
-</body>
 
-</html>
+@endsection

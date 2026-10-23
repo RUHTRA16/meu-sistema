@@ -1,78 +1,182 @@
+@extends('layouts.app')
 
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Meu RPG</title>
-</head>
-<body>
-    <h1>Meu RPG</h1>
+@section('title', 'Início | RPG Paranormal')
 
-    <p>Crie personagens, organize campanhas e viva suas próprias aventuras.</p>
+@section('content')
 
-    @if (session('success'))
-        <p>{{ session('success') }}</p>
-    @endif
+    <section class="stats-grid">
+        <div class="stat-card">
+            <span class="eyebrow">Campanhas</span>
+            <h2>{{ $campaigns->count() }}</h2>
+            <p>Casos registrados</p>
+        </div>
 
-    <section>
-        <h2>Campanhas</h2>
+        <div class="stat-card">
+            <span class="eyebrow">Personagens</span>
+            <h2>{{ $campaigns->sum(fn ($campaign) => $campaign->characters->count()) }}</h2>
+            <p>Agentes cadastrados</p>
+        </div>
+    </section>
 
-        <p>
-            <a href="/campanhas/nova">Nova campanha</a>
-        </p>
+    <section class="card operations-header">
+        <div class="operations-header-content">
+            <span class="eyebrow">ORDEM • CENTRAL DE INTELIGÊNCIA</span>
 
-        @forelse ($campaigns as $campaign)
-            
-        <article>
-            <h3>{{ $campaign->title }}</h3>
-
-            <p>Status: {{ $campaign->status }}</p>
+            <h2>Central de operações</h2>
 
             <p>
-                Criada em:
-                {{ $campaign->created_at->format('d/m/Y H:i') }}
+                Os arquivos estão disponíveis, agente.
+                Consulte suas campanhas, gerencie sua equipe
+                e prepare-se para investigar o inexplicável.
             </p>
 
-            <a href="/campanhas/{{ $campaign->id }}/personagens/novo">
-                Criar personagem
-            </a>
-        </article>
+            <div class="operations-status">
+                <span class="status-indicator"></span>
+                SISTEMA OPERACIONAL
+            </div>
+        </div>
 
-        @empty
-            <p>Você ainda não criou nenhuma campanha.</p>
-        @endforelse
+        <div class="operations-classification">
+            <span>CLASSIFICAÇÃO</span>
+            <strong>CONFIDENCIAL</strong>
+            <span>ACESSO AOS ARQUIVOS</span>
+        </div>
     </section>
-        
-    <section>
-        <h2>Personagens</h2>
 
-        @forelse ($campaigns as $campaign)
-            <h3>{{ $campaign->title }}</h3>
+    @if (session('success'))
+        <div class="alert">
+            {{ session('success') }}
+        </div>
+    @endif
+
+    @if (session('error'))
+        <div class="alert">
+            {{ session('error') }}
+        </div>
+    @endif
+
+    @forelse ($campaigns as $campaign)
+        <section class="card">
+            <span class="eyebrow">Arquivo de campanha</span>
+
+            <h2>{{ $campaign->title }}</h2>
+
+            <div class="character-status">
+                <span>Status da campanha</span>
+
+                <span class="status-badge status-campaign">
+                    {{ match ($campaign->status) {
+                        'setup' => 'Em preparação',
+                        'active' => 'Em andamento',
+                        'completed' => 'Concluída',
+                        default => ucfirst(str_replace('_', ' ', $campaign->status ?? 'Não definido')),
+                    } }}
+                </span>
+            </div>
+
+            <hr>
+
+            <h3>Personagens</h3>
 
             @forelse ($campaign->characters as $character)
-                <article>
+                <div class="character-card">
                     <h3>{{ $character->name }}</h3>
 
-                    Status:
-                     @if ($character->creation_status === 'confirmed')
-                        Confirmada
-                     @else
-                        Rascunho
-                    @endif
+                    <div class="character-status">
+                        <span>Status da ficha</span>
 
-                    <a href="/campanhas/{{ $campaign->id }}/personagens/{{ $character->id }}/detalhes">
+                        @if ($character->creation_status === 'confirmed')
+                            <span class="status-badge status-confirmed">
+                                Confirmada
+                            </span>
+                        @else
+                            <span class="status-badge status-draft">
+                                Rascunho
+                            </span>
+                        @endif
+                    </div>
+
+                    <a
+                        href="{{ route('characters.details', [
+                            'campaign' => $campaign->id,
+                            'character' => $character->id,
+                        ]) }}"
+                        class="btn btn-secondary"
+                    >
                         Editar personagem
                     </a>
-                </article>
+
+                    <a
+                        href="{{ route('characters.review', [
+                            'campaign' => $campaign->id,
+                            'character' => $character->id,
+                        ]) }}"
+                        class="btn"
+                    >
+                        Ver ficha
+                    </a>
+
+                    <form
+                        action="{{ route('characters.destroy', [
+                            'campaign' => $campaign->id,
+                            'character' => $character->id,
+                        ]) }}"
+                        method="POST"
+                        onsubmit="return confirm('Tem certeza de que deseja excluir este personagem? Esta ação não pode ser desfeita.');"
+                    >
+                        @csrf
+                        @method('DELETE')
+
+                        <button type="submit" class="btn btn-secondary">
+                            Excluir personagem
+                        </button>
+                    </form>
+
+                </div>
             @empty
-                <p>Nenhum personagem nesta campanha ainda.</p>
+                <p>Esta campanha ainda não possui personagens.</p>
             @endforelse
-        @empty
-            <p>Crie uma campanha para começar.</p>
-        @endforelse
-    </section>
 
-</body>
+            <hr>
 
-</html>
+            <a
+                href="{{ route('characters.create', [
+                    'campaign' => $campaign->id,
+                ]) }}"
+                class="btn"
+            >
+                + Criar personagem
+            </a>
+
+            <form
+                action="{{ route('campaigns.destroy', [
+                    'campaign' => $campaign->id,
+                ]) }}"
+                method="POST"
+                onsubmit="return confirm('Tem certeza de que deseja excluir esta campanha? Campanhas com personagens não podem ser excluídas.');"
+            >
+                @csrf
+                @method('DELETE')
+
+                <button type="submit" class="btn btn-secondary">
+                    Excluir campanha
+                </button>
+            </form>
+
+        </section>
+    @empty
+        <section class="card">
+            <h2>Nenhuma campanha encontrada</h2>
+
+            <p>
+                Seu primeiro caso começa aqui. Crie uma campanha
+                para começar a montar sua equipe.
+            </p>
+
+            <a href="{{ route('campaigns.create') }}" class="btn">
+                Criar primeira campanha
+            </a>
+        </section>
+    @endforelse
+
+@endsection

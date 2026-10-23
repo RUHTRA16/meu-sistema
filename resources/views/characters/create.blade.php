@@ -1,38 +1,46 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Criar personagem | Meu RPG</title>
-</head>
-<body>
-    <h1>Criar personagem</h1>
+@extends('layouts.app')
 
-    <h2>Etapa 1 — Identidade</h2>
+@section('title', 'Criar personagem | RPG Paranormal')
 
-    <p>Campanha: {{ $campaign->title }}</p>
+@section('content')
 
-    <p>Comece definindo quem é o seu personagem.</p>
+    <section class="card">
+        <span class="eyebrow">Etapa 01 — Identificação</span>
 
-    @if ($errors->any())
-        <div>
-            <strong>Confira os dados informados:</strong>
+        <h2>Criar personagem</h2>
 
-            <ul>
-                @foreach ($errors->all() as $error)
-                    <li>{{ $error }}</li>
-                @endforeach
-            </ul>
-        </div>
-    @endif
+        <p>
+            Campanha:
+            <strong>{{ $campaign->title }}</strong>
+        </p>
 
-    <form
-        action="/campanhas/{{ $campaign->id }}/personagens"
-        method="POST"
-    >
-        @csrf
+        <p>
+            Antes de enfrentar o desconhecido, defina quem estará
+            entrando nessa investigação.
+        </p>
+    </section>
 
-        <div>
+    <section class="card">
+        <h2>Identidade do personagem</h2>
+
+        @if ($errors->any())
+            <div class="alert">
+                <strong>Confira os dados informados:</strong>
+
+                <ul>
+                    @foreach ($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
+
+        <form
+            action="{{ route('characters.store', ['campaign' => $campaign->id]) }}"
+            method="POST"
+        >
+            @csrf
+
             <label for="name">Nome do personagem</label>
 
             <input
@@ -41,11 +49,15 @@
                 name="name"
                 value="{{ old('name') }}"
                 maxlength="255"
+                placeholder="Digite o nome do agente"
+                class="@error('name') input-error @enderror"
                 required
             >
-        </div>
 
-        <div>
+            @error('name')
+                <p class="error">{{ $message }}</p>
+            @enderror
+
             <label for="age">Idade</label>
 
             <input
@@ -55,10 +67,15 @@
                 value="{{ old('age') }}"
                 min="1"
                 max="120"
+                placeholder="Ex.: 25"
+                class="@error('age') input-error @enderror"
+                required
             >
-        </div>
 
-        <div>
+            @error('age')
+                <p class="error">{{ $message }}</p>
+            @enderror
+
             <label for="backstory">História do personagem</label>
 
             <textarea
@@ -66,14 +83,20 @@
                 name="backstory"
                 rows="6"
                 maxlength="5000"
+                placeholder="Conte um pouco sobre o passado do personagem..."
+                class="@error('backstory') input-error @enderror"
             >{{ old('backstory') }}</textarea>
-        </div>
 
-        <button type="submit">Salvar e continuar</button>
-    </form>
+            @error('backstory')
+                <p class="error">{{ $message }}</p>
+            @enderror
 
-    <p>
-        <a href="/">Voltar para o início</a>
-    </p>
-</body>
-</html>
+            <button type="submit">Salvar e continuar</button>
+
+            <a href="{{ route('home') }}" class="btn btn-secondary">
+                Voltar ao início
+            </a>
+        </form>
+    </section>
+
+@endsection

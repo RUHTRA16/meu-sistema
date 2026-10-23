@@ -1,59 +1,106 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Criação de personagem</title>
-</head>
-<body>
-    <h1>Criação de personagem</h1>
 
-    <p>
-        <strong>Campanha:</strong>
-        {{ $campaign->title }}
-    </p>
+@extends('layouts.app')
 
-    <p>
-        <strong>Personagem:</strong>
-        {{ $character->name }}
-    </p>
+@section('title', 'Ficha do personagem | RPG Paranormal')
+
+@section('content')
+
+    <section class="card">
+        <span class="eyebrow">Arquivo confidencial — Agente</span>
+
+        <h2>Criação de personagem</h2>
+
+        <p><strong>Campanha:</strong> {{ $campaign->title }}</p>
+        <p><strong>Personagem:</strong> {{ $character->name }}</p>
+
+        <p>
+            Preencha cada etapa para construir a ficha do seu personagem.
+        </p>
+    </section>
+
+    <section class="card">
+        <span class="eyebrow">Progresso da criação</span>
+
+        <div class="creation-steps">
+            <div class="creation-step active" id="step-indicator-1">
+                <span>01</span>
+                <p>Identidade</p>
+            </div>
+
+            <div class="creation-step" id="step-indicator-2">
+                <span>02</span>
+                <p>História e aparência</p>
+            </div>
+
+            <div class="creation-step" id="step-indicator-3">
+                <span>03</span>
+                <p>Atributos</p>
+            </div>
+        </div>
+    </section>
 
     @if (session('success'))
-        <p>{{ session('success') }}</p>
+        <div class="alert">
+            {{ session('success') }}
+        </div>
+    @endif
+
+    @if (session('error'))
+        <div class="alert">
+            {{ session('error') }}
+        </div>
+    @endif
+
+    @if ($errors->any())
+        <div class="alert">
+            <strong>Não foi possível salvar todos os dados:</strong>
+
+            <ul>
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
     @endif
 
     <form
-        action="/campanhas/{{ $campaign->id }}/personagens/{{ $character->id }}/detalhes"
+        id="character-form"
+        action="{{ route('characters.details.update', [
+            'campaign' => $campaign->id,
+            'character' => $character->id,
+        ]) }}"
         method="POST"
     >
         @csrf
         @method('PUT')
 
-        <hr>
+        <input
+            type="hidden"
+            name="current_step"
+            id="current_step"
+            value="{{ old('current_step', 1) }}"
+        >
 
-        <h2>Etapa 1 — Identidade</h2>
+        {{-- ETAPA 1: IDENTIDADE --}}
+        <section class="card creation-panel" id="step-1">
+            <span class="eyebrow">Etapa 01 de 03</span>
+            <h2>Identidade</h2>
 
-        <div>
             <label for="name">Nome do personagem</label>
-            <br>
             <input
                 type="text"
                 id="name"
                 name="name"
                 value="{{ old('name', $character->name) }}"
+                maxlength="255"
                 required
             >
 
             @error('name')
-                <p>{{ $message }}</p>
+                <p class="error">{{ $message }}</p>
             @enderror
-        </div>
 
-        <br>
-
-        <div>
             <label for="age">Idade</label>
-            <br>
             <input
                 type="number"
                 id="age"
@@ -64,242 +111,366 @@
             >
 
             @error('age')
-                <p>{{ $message }}</p>
+                <p class="error">{{ $message }}</p>
             @enderror
-        </div>
+        </section>
 
-        <hr>
+        {{-- ETAPA 2: HISTÓRIA E APARÊNCIA --}}
+        <section class="card creation-panel" id="step-2" hidden>
+            <span class="eyebrow">Etapa 02 de 03</span>
+            <h2>História e aparência</h2>
 
-        <h2>Etapa 2 — História e aparência</h2>
-
-        <div>
             <label for="appearance">Aparência física</label>
-            <br>
             <textarea
                 id="appearance"
                 name="appearance"
                 rows="4"
+                maxlength="5000"
+                placeholder="Descreva a aparência do personagem..."
             >{{ old('appearance', $character->appearance) }}</textarea>
 
             @error('appearance')
-                <p>{{ $message }}</p>
+                <p class="error">{{ $message }}</p>
             @enderror
-        </div>
 
-        <br>
-
-        <div>
             <label for="personality">Personalidade</label>
-            <br>
             <textarea
                 id="personality"
                 name="personality"
                 rows="4"
+                maxlength="5000"
+                placeholder="Como o personagem pensa, sente e age?"
             >{{ old('personality', $character->personality) }}</textarea>
 
             @error('personality')
-                <p>{{ $message }}</p>
+                <p class="error">{{ $message }}</p>
             @enderror
-        </div>
 
-        <br>
-
-        <div>
             <label for="backstory">História do personagem</label>
-            <br>
             <textarea
                 id="backstory"
                 name="backstory"
                 rows="6"
+                maxlength="5000"
+                placeholder="Conte o passado e os acontecimentos importantes..."
             >{{ old('backstory', $character->backstory) }}</textarea>
 
             @error('backstory')
-                <p>{{ $message }}</p>
+                <p class="error">{{ $message }}</p>
             @enderror
-        </div>
+        </section>
 
-        <hr>
+        {{-- ETAPA 3: ATRIBUTOS --}}
+        <section class="card creation-panel" id="step-3" hidden>
+            <span class="eyebrow">Etapa 03 de 03</span>
+            <h2>Atributos do personagem</h2>
 
-        <h2>Etapa 3 — Atributos do personagem</h2>
+            <p>
+                Distribua os pontos entre os cinco atributos.
+                Nesta versão, o total permitido é 9, com valores de 0 a 3
+                por atributo.
+            </p>
 
-        @error('attributes')
-            <p>{{ $message }}</p>
-        @enderror
+            @error('attributes')
+                <div class="alert">{{ $message }}</div>
+            @enderror
 
-        <p>
-            Distribua os valores dos atributos conforme as regras
-            que implementaremos para o sistema de RPG.
-        </p>
+            <div class="attributes-grid">
+                <div class="attribute-card">
+                    <label for="agi">AGI — Agilidade</label>
+                    <input
+                        type="number"
+                        id="agi"
+                        name="agi"
+                        min="0"
+                        max="3"
+                        value="{{ old('agi', $character->agi) }}"
+                        required
+                    >
+                    @error('agi')
+                        <p class="error">{{ $message }}</p>
+                    @enderror
+                </div>
 
-        <div>
-            <label for="agi">AGI — Agilidade</label>
-            <br>
-            <input
-                type="number"
-                id="agi"
-                name="agi"
-                min="0"
-                max="3"
-                value="{{ old('agi', $character->agi) }}"
-                required
+                <div class="attribute-card">
+                    <label for="forca">FOR — Força</label>
+                    <input
+                        type="number"
+                        id="forca"
+                        name="forca"
+                        min="0"
+                        max="3"
+                        value="{{ old('forca', $character->forca) }}"
+                        required
+                    >
+                    @error('forca')
+                        <p class="error">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                <div class="attribute-card">
+                    <label for="intelecto">INT — Intelecto</label>
+                    <input
+                        type="number"
+                        id="intelecto"
+                        name="intelecto"
+                        min="0"
+                        max="3"
+                        value="{{ old('intelecto', $character->intelecto) }}"
+                        required
+                    >
+                    @error('intelecto')
+                        <p class="error">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                <div class="attribute-card">
+                    <label for="presenca">PRE — Presença</label>
+                    <input
+                        type="number"
+                        id="presenca"
+                        name="presenca"
+                        min="0"
+                        max="3"
+                        value="{{ old('presenca', $character->presenca) }}"
+                        required
+                    >
+                    @error('presenca')
+                        <p class="error">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                <div class="attribute-card">
+                    <label for="vigor">VIG — Vigor</label>
+                    <input
+                        type="number"
+                        id="vigor"
+                        name="vigor"
+                        min="0"
+                        max="3"
+                        value="{{ old('vigor', $character->vigor) }}"
+                        required
+                    >
+                    @error('vigor')
+                        <p class="error">{{ $message }}</p>
+                    @enderror
+                </div>
+            </div>
+
+            <div class="attribute-total">
+                <h3>
+                    Total dos atributos:
+                    <strong><span id="total-atributos">0</span> / 9</strong>
+                </h3>
+
+                <p id="mensagem-atributos">Calculando...</p>
+            </div>
+        </section>
+
+        {{-- NAVEGAÇÃO ENTRE ETAPAS --}}
+        <section class="card">
+            <div class="step-navigation">
+                <button
+                    type="button"
+                    id="previous-step"
+                    class="btn btn-secondary"
+                    hidden
+                >
+                    ← Etapa anterior
+                </button>
+
+                <button
+                    type="button"
+                    id="next-step"
+                >
+                    Próxima etapa →
+                </button>
+
+                <button
+                    type="submit"
+                    id="save-character"
+                    hidden
+                >
+                    Salvar personagem
+                </button>
+            </div>
+
+            <a
+                href="{{ route('characters.review', [
+                    'campaign' => $campaign->id,
+                    'character' => $character->id,
+                ]) }}"
+                class="btn btn-secondary"
             >
-
-            @error('agi')
-                <p>{{ $message }}</p>
-            @enderror
-        </div>
-
-        <br>
-
-        <div>
-            <label for="forca">FOR — Força</label>
-            <br>
-            <input
-                type="number"
-                id="forca"
-                name="forca"
-                min="0"
-                max="3"
-                value="{{ old('forca', $character->forca) }}"
-                required
-            >
-
-            @error('forca')
-                <p>{{ $message }}</p>
-            @enderror
-        </div>
-
-        <br>
-
-        <div>
-            <label for="intelecto">INT — Intelecto</label>
-            <br>
-            <input
-                type="number"
-                id="intelecto"
-                name="intelecto"
-                min="0"
-                max="3"
-                value="{{ old('intelecto', $character->intelecto) }}"
-                required
-            >
-
-            @error('intelecto')
-                <p>{{ $message }}</p>
-            @enderror
-        </div>
-
-        <br>
-
-        <div>
-            <label for="presenca">PRE — Presença</label>
-            <br>
-            <input
-                type="number"
-                id="presenca"
-                name="presenca"
-                min="0"
-                max="3"
-                value="{{ old('presenca', $character->presenca) }}"
-                required
-            >
-
-            @error('presenca')
-                <p>{{ $message }}</p>
-            @enderror
-        </div>
-
-        <br>
-
-        <div>
-            <label for="vigor">VIG — Vigor</label>
-            <br>
-            <input
-                type="number"
-                id="vigor"
-                name="vigor"
-                min="0"
-                max="3"
-                value="{{ old('vigor', $character->vigor) }}"
-                required
-            >
-
-            @error('vigor')
-                <p>{{ $message }}</p>
-            @enderror
-        </div>
-      
-        <div>
-            <h3>Total dos atributos: <span id="total-atributos">0</span> / 9</h3>
-            <p id="mensagem-atributos">Calculando...</p>
-        </div>
-
-        <hr>
-
-        <button type="submit">Salvar personagem</button>
+                Visualizar ficha completa
+            </a>
+        </section>
     </form>
 
     <p>
-        <a href="/campanhas/{{ $campaign->id }}/personagens/{{ $character->id }}/revisao">
-            Visualizar ficha completa
-        </a>
+        <a href="{{ route('home') }}">← Voltar para o início</a>
     </p>
 
-    <p>
-        <a href="/">
-            Voltar para a página inicial
-        </a>
-    </p>
-</body>
-</html>
-
+@endsection
 
 <script>
-    const camposAtributos = [
-        'agi',
-        'forca',
-        'intelecto',
-        'presenca',
-        'vigor'
-    ];
+    document.addEventListener('DOMContentLoaded', function () {
+        const panels = [
+            document.getElementById('step-1'),
+            document.getElementById('step-2'),
+            document.getElementById('step-3')
+        ];
 
-    const totalAtributos = document.getElementById('total-atributos');
-    const mensagemAtributos = document.getElementById('mensagem-atributos');
+        const indicators = [
+            document.getElementById('step-indicator-1'),
+            document.getElementById('step-indicator-2'),
+            document.getElementById('step-indicator-3')
+        ];
 
-    function atualizarTotalAtributos() {
-        let total = 0;
+        const previousButton = document.getElementById('previous-step');
+        const nextButton = document.getElementById('next-step');
+        const saveButton = document.getElementById('save-character');
 
-        camposAtributos.forEach(function (atributo) {
-            const campo = document.querySelector('[name="' + atributo + '"]');
+        let currentStep = 0;
+        const currentStepInput = document.getElementById('current_step');
 
-            if (campo) {
-                total += Number(campo.value) || 0;
+        function showStep(step) {
+            currentStep = step;
+            currentStepInput.value = currentStep + 1;
+
+            panels.forEach(function (panel, index) {
+                panel.hidden = index !== currentStep;
+            });
+
+            indicators.forEach(function (indicator, index) {
+                indicator.classList.toggle('active', index === currentStep);
+                indicator.classList.toggle('completed', index < currentStep);
+            });
+
+            previousButton.hidden = currentStep === 0;
+            nextButton.hidden = currentStep === panels.length - 1;
+            saveButton.hidden = currentStep !== panels.length - 1;
+
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        }
+
+        nextButton.addEventListener('click', function () {
+            const currentPanel = panels[currentStep];
+            const requiredFields = currentPanel.querySelectorAll('[required]');
+
+            for (const field of requiredFields) {
+                if (!field.checkValidity()) {
+                    field.reportValidity();
+                    return;
+                }
+            }
+
+            if (currentStep < panels.length - 1) {
+                showStep(currentStep + 1);
             }
         });
 
-        totalAtributos.textContent = total;
+        previousButton.addEventListener('click', function () {
+            if (currentStep > 0) {
+                showStep(currentStep - 1);
+            }
+        });
 
-        if (total === 9) {
-            mensagemAtributos.textContent = 'Distribuição válida!';
-            mensagemAtributos.style.color = 'green';
-        } else {
-            mensagemAtributos.textContent =
-                'A soma deve ser 9. ' +
-                (total < 9
-                    ? 'Faltam ' + (9 - total) + ' ponto(s).'
-                    : 'Você ultrapassou ' + (total - 9) + ' ponto(s).');
+        const camposAtributos = [
+            'agi',
+            'forca',
+            'intelecto',
+            'presenca',
+            'vigor'
+        ];
 
-            mensagemAtributos.style.color = 'red';
+        const totalAtributos = document.getElementById('total-atributos');
+        const mensagemAtributos = document.getElementById('mensagem-atributos');
+
+        function atualizarTotalAtributos() {
+            let total = 0;
+            let valoresValidos = true;
+
+            camposAtributos.forEach(function (atributo) {
+                const campo = document.getElementById(atributo);
+                const valor = Number(campo.value);
+
+                if (
+                    campo.value.trim() === '' ||
+                    !Number.isInteger(valor) ||
+                    valor < 0 ||
+                    valor > 3
+                ) {
+                    valoresValidos = false;
+                } else {
+                    total += valor;
+                }
+            });
+
+            totalAtributos.textContent = total;
+
+            if (!valoresValidos) {
+                mensagemAtributos.textContent =
+                    'Preencha todos os atributos com valores de 0 a 3.';
+                mensagemAtributos.style.color = '#ff747e';
+            } else if (total === 9) {
+                mensagemAtributos.textContent = 'Distribuição válida!';
+                mensagemAtributos.style.color = '#ff646e';
+            } else {
+                mensagemAtributos.textContent =
+                    'A soma deve ser 9. ' +
+                    (total < 9
+                        ? 'Faltam ' + (9 - total) + ' ponto(s).'
+                        : 'Você ultrapassou ' + (total - 9) + ' ponto(s).');
+
+                mensagemAtributos.style.color = '#ff747e';
+            }
         }
-    }
 
-    camposAtributos.forEach(function (atributo) {
-        const campo = document.querySelector('[name="' + atributo + '"]');
+        camposAtributos.forEach(function (atributo) {
+            const campo = document.getElementById(atributo);
 
-        if (campo) {
             campo.addEventListener('input', atualizarTotalAtributos);
-        }
-    });
+        });
 
-    atualizarTotalAtributos();
+        const erros = @json($errors->keys());
+
+        let etapaInicial = 0;
+
+        if (
+            erros.includes('appearance') ||
+            erros.includes('personality') ||
+            erros.includes('backstory')
+        ) {
+            etapaInicial = 1;
+        } else if (
+            erros.includes('agi') ||
+            erros.includes('forca') ||
+            erros.includes('intelecto') ||
+            erros.includes('presenca') ||
+            erros.includes('vigor') ||
+            erros.includes('attributes')
+        ) {
+            etapaInicial = 2;
+        } else if (
+            erros.includes('name') ||
+            erros.includes('age')
+        ) {
+            etapaInicial = 0;
+        } else {
+            const etapaAnterior = Number(
+                document.getElementById('current_step').value
+            );
+
+            if (etapaAnterior >= 1 && etapaAnterior <= 3) {
+                etapaInicial = etapaAnterior - 1;
+            }
+        }
+
+        showStep(etapaInicial);
+        atualizarTotalAtributos();
+    });
 </script>

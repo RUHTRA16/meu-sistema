@@ -25,4 +25,22 @@ class CampaignController extends Controller
         return redirect('/')
             ->with('success', 'Campanha criada com sucesso!');
     }
+
+    public function destroy(Campaign $campaign): RedirectResponse
+    {
+        if ($campaign->characters()->exists()) {
+            return redirect()
+                ->route('home')
+                ->with(
+                    'error',
+                    'Não é possível excluir esta campanha porque ela ainda possui personagens. Exclua os personagens primeiro.'
+                );
+        }
+
+        $campaign->delete();
+
+        return redirect()
+            ->route('home')
+            ->with('success', 'Campanha excluída com sucesso!');
+    }
 }

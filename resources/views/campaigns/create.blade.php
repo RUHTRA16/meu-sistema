@@ -1,46 +1,57 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nova campanha | Meu RPG</title>
-</head>
-<body>
-    <h1>Nova campanha</h1>
+@extends('layouts.app')
 
-    <p>Prepare uma nova aventura para jogar.</p>
+@section('title', 'Nova campanha | RPG Paranormal')
 
-    @if ($errors->any())
-        <div>
-            <strong>Confira os dados informados:</strong>
-            <ul>
-                @foreach ($errors->all() as $error)
-                    <li>{{ $error }}</li>
-                @endforeach
-            </ul>
-        </div>
-    @endif
+@section('content')
 
-    <form action="{{ route('campaigns.store') }}" method="POST">
-        @csrf
+    <section class="card">
+        <span class="eyebrow">Novo arquivo de investigação</span>
 
-        <div>
+        <h2>Criar campanha</h2>
+
+        <p>
+            Prepare uma nova aventura, reúna seus agentes
+            e descubra os mistérios que aguardam por você.
+        </p>
+
+        @if ($errors->any())
+            <div class="alert">
+                <strong>Confira os dados informados:</strong>
+
+                <ul>
+                    @foreach ($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
+
+        <form action="{{ route('campaigns.store') }}" method="POST">
+            @csrf
+
             <label for="title">Nome da campanha</label>
+
             <input
                 type="text"
                 id="title"
                 name="title"
                 value="{{ old('title') }}"
                 maxlength="255"
+                placeholder="Ex.: O Segredo da Floresta"
+                class="@error('title') input-error @enderror"
                 required
             >
-        </div>
 
-        <button type="submit">Criar campanha</button>
-    </form>
+            @error('title')
+                <p class="error">{{ $message }}</p>
+            @enderror
 
-    <p>
-        <a href="/">Voltar para o início</a>
-    </p>
-</body>
-</html>
+            <button type="submit">Criar campanha</button>
+
+            <a href="{{ route('home') }}" class="btn btn-secondary">
+                Voltar
+            </a>
+        </form>
+    </section>
+
+@endsection
