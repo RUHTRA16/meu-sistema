@@ -209,15 +209,52 @@
             @enderror
 
             <label for="origin">Origem do personagem</label>
-            <input
-                type="text"
+            <select
                 id="origin"
                 name="origin"
-                value="{{ old('origin', $character->origin) }}"
-                maxlength="100"
-                placeholder="Informe a origem do personagem"
                 required
             >
+                <option value="">Selecione uma origem</option>
+
+                @foreach ([
+                    'Acadêmico',
+                    'Agente de Saúde',
+                    'Amnésico',
+                    'Artista',
+                    'Atleta',
+                    'Chef',
+                    'Criminoso',
+                    'Cultista Arrependido',
+                    'Desgarrado',
+                    'Engenheiro',
+                    'Executivo',
+                    'Explorador',
+                    'Fanático por Criaturas',
+                    'Fotógrafo',
+                    'Investigador',
+                    'Lutador',
+                    'Magnata',
+                    'Mercenário',
+                    'Militar',
+                    'Operário',
+                    'Policial',
+                    'Religioso',
+                    'Servidor Público',
+                    'Teórico da Conspiração',
+                    'T.I.',
+                    'Trabalhador Rural',
+                    'Trambiqueiro',
+                    'Universitário',
+                    'Vítima',
+                ] as $originOption)
+                    <option
+                        value="{{ $originOption }}"
+                        {{ old('origin', $character->origin) === $originOption ? 'selected' : '' }}
+                    >
+                        {{ $originOption }}
+                    </option>
+                @endforeach
+            </select>
 
             @error('origin')
                 <p class="error">{{ $message }}</p>
