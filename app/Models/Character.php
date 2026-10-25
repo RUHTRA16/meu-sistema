@@ -25,13 +25,18 @@ class Character extends Model
         'nex',
     ];
 
-        protected function casts(): array
-    {
-        return [
+            protected function casts(): array
+        {
+            return [
             'age' => 'integer',
             'nex' => 'integer',
-        ];
-    }
+            'agi' => 'integer',
+            'forca' => 'integer',
+            'intelecto' => 'integer',
+            'presenca' => 'integer',
+            'vigor' => 'integer',
+            ];  
+        }
 
     public function campaign(): BelongsTo
     {

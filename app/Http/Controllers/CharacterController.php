@@ -213,27 +213,66 @@ class CharacterController extends Controller
                 ->with('success', 'Esta ficha já está confirmada.');
         }
 
-        $totalAtributos =
-            $character->agi +
-            $character->forca +
-            $character->intelecto +
-            $character->presenca +
-            $character->vigor;
+        $atributos = [
+            $character->agi,
+            $character->forca,
+            $character->intelecto,
+            $character->presenca,
+            $character->vigor,
+        ];
+
+        $atributosValidos = collect($atributos)->every(
+            fn ($atributo) => $atributo !== null
+                && $atributo >= 0
+                && $atributo <= 3
+        );
+
+        $totalAtributos = array_sum($atributos);
+
+        $classesValidas = [
+            'Combatente',
+            'Especialista',
+            'Ocultista',
+        ];
+
+        $origensValidas = [
+            'Acadêmico',
+            'Agente de Saúde',
+            'Amnésico',
+            'Artista',
+            'Atleta',
+            'Chef',
+            'Criminoso',
+            'Cultista Arrependido',
+            'Desgarrado',
+            'Engenheiro',
+            'Executivo',
+            'Explorador',
+            'Fanático por Criaturas',
+            'Fotógrafo',
+            'Investigador',
+            'Lutador',
+            'Magnata',
+            'Mercenário',
+            'Militar',
+            'Operário',
+            'Policial',
+            'Religioso',
+            'Servidor Público',
+            'Teórico da Conspiração',
+            'T.I.',
+            'Trabalhador Rural',
+            'Trambiqueiro',
+            'Universitário',
+            'Vítima',
+        ];
 
         if (
             empty($character->name) ||
-            !in_array($character->character_class, [
-                'Combatente',
-                'Especialista',
-                'Ocultista',
-            ], true) ||
-            empty($character->origin) ||
+            !in_array($character->character_class, $classesValidas, true) ||
+            !in_array($character->origin, $origensValidas, true) ||
             $character->nex !== 5 ||
-            $character->agi === null ||
-            $character->forca === null ||
-            $character->intelecto === null ||
-            $character->presenca === null ||
-            $character->vigor === null ||
+            !$atributosValidos ||
             $totalAtributos !== 9
         ) {
             return redirect()
