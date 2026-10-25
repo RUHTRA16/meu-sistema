@@ -23,6 +23,12 @@
                 {{ session('success') }}
             </div>
         @endif
+
+        @if (session('error'))
+            <div class="alert">
+                {{ session('error') }}
+            </div>
+        @endif        
     </section>
 
     <section class="card">
@@ -128,20 +134,22 @@
         @endif
     </section>
 
-    <nav>
-        <a
-            href="{{ route('characters.details', [
-                'campaign' => $campaign->id,
-                'character' => $character->id,
-            ]) }}"
-            class="btn btn-secondary"
-        >
-            Voltar e editar
-        </a>
+        <nav>
+            @if ($character->creation_status !== 'confirmed')
+                <a
+                    href="{{ route('characters.details', [
+                        'campaign' => $campaign->id,
+                        'character' => $character->id,
+                    ]) }}"
+                    class="btn btn-secondary"
+                >
+                    Voltar e editar
+                </a>
+            @endif
 
-        <a href="{{ route('home') }}" class="btn">
-            Página inicial
-        </a>
-    </nav>
+            <a href="{{ route('home') }}" class="btn">
+                Página inicial
+            </a>
+        </nav>
 
 @endsection

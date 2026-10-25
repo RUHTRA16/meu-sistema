@@ -31,20 +31,34 @@ class CharacterController extends Controller
             'creation_status' => 'draft',
         ]);
 
-        return redirect()->route('characters.details', [
-            'campaign' => $campaign->id,
-            'character' => $character->id,
-        ])->with('success', 'Personagem salvo com sucesso!');
+        return redirect()
+            ->route('characters.details', [
+                'campaign' => $campaign->id,
+                'character' => $character->id,
+            ])
+            ->with('success', 'Personagem salvo com sucesso!');
     }
 
     public function details(
         Campaign $campaign,
         Character $character
-    ): View {
+    ): View|RedirectResponse {
         abort_unless(
             $character->campaign_id === $campaign->id,
             404
         );
+
+        if ($character->creation_status === 'confirmed') {
+            return redirect()
+                ->route('characters.review', [
+                    'campaign' => $campaign->id,
+                    'character' => $character->id,
+                ])
+                ->with(
+                    'error',
+                    'Esta ficha já foi confirmada e não pode ser alterada.'
+                );
+        }
 
         return view('characters.details', compact(
             'campaign',
@@ -61,6 +75,18 @@ class CharacterController extends Controller
             $character->campaign_id === $campaign->id,
             404
         );
+
+        if ($character->creation_status === 'confirmed') {
+            return redirect()
+                ->route('characters.review', [
+                    'campaign' => $campaign->id,
+                    'character' => $character->id,
+                ])
+                ->with(
+                    'error',
+                    'Esta ficha já foi confirmada e não pode ser alterada.'
+                );
+        }
 
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
@@ -146,7 +172,10 @@ class CharacterController extends Controller
                 'campaign' => $campaign->id,
                 'character' => $character->id,
             ])
-            ->with('success', 'Detalhes do personagem salvos com sucesso!');
+            ->with(
+                'success',
+                'Detalhes do personagem salvos com sucesso!'
+            );
     }
 
     public function review(
@@ -174,6 +203,15 @@ class CharacterController extends Controller
         );
 
         $character->refresh();
+
+        if ($character->creation_status === 'confirmed') {
+            return redirect()
+                ->route('characters.review', [
+                    'campaign' => $campaign->id,
+                    'character' => $character->id,
+                ])
+                ->with('success', 'Esta ficha já está confirmada.');
+        }
 
         $totalAtributos =
             $character->agi +
@@ -218,7 +256,10 @@ class CharacterController extends Controller
                 'campaign' => $campaign->id,
                 'character' => $character->id,
             ])
-            ->with('success', 'Ficha do personagem confirmada com sucesso!');
+            ->with(
+                'success',
+                'Ficha do personagem confirmada com sucesso!'
+            );
     }
 
     public function destroy(
