@@ -10,6 +10,7 @@ class Campaign extends Model
     protected $fillable = [
         'title',
         'status',
+        'cover_path',
     ];
 
     public function characters(): HasMany

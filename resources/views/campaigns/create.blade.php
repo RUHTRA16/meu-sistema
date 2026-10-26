@@ -26,7 +26,11 @@
             </div>
         @endif
 
-        <form action="{{ route('campaigns.store') }}" method="POST">
+        <form
+            action="{{ route('campaigns.store') }}"
+            method="POST"
+            enctype="multipart/form-data"
+        >
             @csrf
 
             <label for="title">Nome da campanha</label>
@@ -43,6 +47,24 @@
             >
 
             @error('title')
+                <p class="error">{{ $message }}</p>
+            @enderror
+
+            <label for="cover">Capa da campanha (opcional)</label>
+
+            <input
+                type="file"
+                id="cover"
+                name="cover"
+                accept="image/jpeg,image/png,image/webp"
+                class="@error('cover') input-error @enderror"
+            >
+
+            <small>
+                Escolha uma imagem JPG, PNG ou WebP de até 4 MB.
+            </small>
+
+            @error('cover')
                 <p class="error">{{ $message }}</p>
             @enderror
 
