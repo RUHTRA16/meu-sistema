@@ -10,6 +10,8 @@
     <meta name="description" content="Central de operações paranormais: campanhas, agentes e investigações.">
 
     <link rel="stylesheet" href="{{ asset('app.css') }}">
+
+    @vite('resources/js/app.js')
 </head>
 <body class="app-shell">
 

@@ -18,7 +18,6 @@ class BookSearchService
 
         $content = File::get($path);
 
-        // Separa o conteúdo pelos marcadores de página do OCR.
         $pages = preg_split(
             '/={20}\s*PÁGINA\s+(\d+)\s*={20}/u',
             $content,
@@ -36,91 +35,44 @@ class BookSearchService
             return '';
         }
 
-        $ignored = [
-            'que', 'qual', 'quais', 'como', 'cada',
-            'uma', 'uns', 'das', 'dos', 'para', 'sobre',
-            'com', 'sem', 'sao', 'ser', 'por', 'em',
-            'de', 'do', 'da', 'e', 'o', 'a', 'no',
-            'na', 'um', 'meu', 'minha', 'consulte',
-            'livro', 'regras', 'regra', 'qualquer',
-            'funciona', 'concedido', 'concedida',
-            'personagem', 'ordem', 'paranormal',
-            'explique', 'informe', 'diga',
-        ];
-
-        $questionWords = preg_split(
-            '/\s+/u',
-            $normalizedQuestion,
-            -1,
-            PREG_SPLIT_NO_EMPTY
-        ) ?: [];
-
-        $words = array_values(array_unique(array_filter(
-            $questionWords,
-            fn (string $word): bool =>
-                mb_strlen($word) >= 3
-                && !in_array($word, $ignored, true)
-        )));
-
-        $phrases = [
-            'testes de resistencia',
-            'testes de resistencia contra rituais',
-            'habilidades de criaturas paranormais',
-            'efeitos paranormais',
-            'criacao de personagem',
-            'pontos de vida',
-            'pontos de esforco',
-            'testes de fortitude',
-            'testes de vontade',
-            'testes de reflexos',
-            'protecao contra rituais',
-            'bonus em testes de resistencia',
-            'atributo base',
-            'pericias',
-        ];
-
-        $normalizedPhrases = array_map(
-            fn (string $phrase): string => $this->normalize($phrase),
-            $phrases
-        );
-
-        $asksAboutResistanceBonus =
-            str_contains($normalizedQuestion, 'resistencia')
-            && (
-                str_contains($normalizedQuestion, 'bonus')
-                || str_contains($normalizedQuestion, 'rituais')
-                || str_contains($normalizedQuestion, 'criaturas')
-            );
+        $words = $this->getSearchWords($normalizedQuestion);
 
         $asksAboutRitualResistance =
             str_contains($normalizedQuestion, 'resistencia')
             && str_contains($normalizedQuestion, 'rituais')
-            && str_contains($normalizedQuestion, 'criaturas paranormais');
-
-        // Reconhece perguntas sobre os cinco atributos.
-        $asksAboutAttributes =
-            str_contains($normalizedQuestion, 'atributos');
-
-        $asksForAttributeNames =
-            $asksAboutAttributes
             && (
-                str_contains($normalizedQuestion, 'cinco')
-                || str_contains($normalizedQuestion, 'quais sao')
-                || str_contains($normalizedQuestion, 'quais')
+                str_contains($normalizedQuestion, 'criaturas paranormais')
+                || str_contains($normalizedQuestion, 'efeitos paranormais')
+                || str_contains($normalizedQuestion, 'bonus')
             );
 
-        // Reconhece perguntas que relacionam atributos e perícias.
         $asksAboutAttributeSkills =
-            str_contains($normalizedQuestion, 'pericias')
+            str_contains($normalizedQuestion, 'pericia')
             && (
-                str_contains($normalizedQuestion, 'atributo base')
-                || str_contains($normalizedQuestion, 'atributos')
+                str_contains($normalizedQuestion, 'atributo')
                 || str_contains($normalizedQuestion, 'agilidade')
                 || str_contains($normalizedQuestion, 'forca')
                 || str_contains($normalizedQuestion, 'intelecto')
                 || str_contains($normalizedQuestion, 'presenca')
                 || str_contains($normalizedQuestion, 'vigor')
+                || str_contains($normalizedQuestion, 'lista completa')
             );
+
+        $asksForAttributeNames =
+            str_contains($normalizedQuestion, 'atributo')
+            && (
+                str_contains($normalizedQuestion, 'cinco')
+                || str_contains($normalizedQuestion, 'quais')
+            )
+            && !str_contains($normalizedQuestion, 'pericia');
+
+        $asksAboutEffort =
+            str_contains($normalizedQuestion, 'ponto de esforco')
+            || str_contains($normalizedQuestion, 'pontos de esforco')
+            || str_contains($normalizedQuestion, 'como funciona o pe');
+
+        $asksAboutDefense =
+            str_contains($normalizedQuestion, 'defesa');
 
         $attributeNames = [
             'agilidade',
@@ -130,9 +82,16 @@ class BookSearchService
             'vigor',
         ];
 
+        $attributeSkillPhrases = [
+            'agilidade e o atributo base das pericias',
+            'forca e o atributo base de atletismo',
+            'intelecto e o atributo base de atualidades',
+            'presenca e o atributo base de diplomacia',
+            'vigor e o atributo base de fortitude',
+        ];
+
         $results = [];
 
-        // Analisa cada página do livro.
         for ($i = 1; $i < count($pages); $i += 2) {
             if (!isset($pages[$i + 1])) {
                 continue;
@@ -151,75 +110,27 @@ class BookSearchService
             $score = 0;
             $matchedWords = 0;
 
-            // Pontua os termos encontrados na página.
             foreach ($words as $word) {
-                $needle = ' ' . $word . ' ';
+                if (str_contains($searchableText, ' ' . $word . ' ')) {
+                    $matchedWords++;
 
-                if (!str_contains($searchableText, $needle)) {
-                    continue;
-                }
-
-                $matchedWords++;
-
-                $occurrences = substr_count(
-                    $searchableText,
-                    $needle
-                );
-
-                $score += min($occurrences, 3);
-            }
-
-            // Valoriza expressões completas.
-            foreach ($normalizedPhrases as $phrase) {
-                if (
-                    str_contains($normalizedQuestion, $phrase)
-                    && str_contains(
+                    $occurrences = substr_count(
                         $searchableText,
-                        ' ' . $phrase . ' '
-                    )
-                ) {
-                    $score += 12;
+                        ' ' . $word . ' '
+                    );
+
+                    $score += min($occurrences, 3);
                 }
             }
 
-            // Considera a proporção de termos encontrados.
             if ($words !== []) {
-                $coverage = $matchedWords / count($words);
-                $score += (int) round($coverage * 10);
+                $score += (int) round(
+                    ($matchedWords / count($words)) * 10
+                );
             }
 
-            // Prioriza a regra Proteção contra Rituais.
-            if ($asksAboutResistanceBonus) {
-                if (
-                    str_contains(
-                        $searchableText,
-                        'protecao contra rituais'
-                    )
-                ) {
-                    $score += 30;
-                }
-
-                if (
-                    str_contains(
-                        $searchableText,
-                        'habilidades de criaturas paranormais'
-                    )
-                ) {
-                    $score += 25;
-                }
-
-                if (
-                    str_contains(
-                        $searchableText,
-                        'testes de resistencia'
-                    )
-                ) {
-                    $score += 10;
-                }
-            }
-
-            // Avalia páginas que apresentam os cinco atributos.
-            if ($asksAboutAttributes || $asksAboutAttributeSkills) {
+            // Busca pelos cinco atributos.
+            if ($asksForAttributeNames || $asksAboutAttributeSkills) {
                 $foundAttributes = 0;
 
                 foreach ($attributeNames as $attribute) {
@@ -234,47 +145,149 @@ class BookSearchService
                 }
 
                 if ($foundAttributes === 5) {
-                    $score += 30;
+                    $score += 25;
                 }
 
                 if (
-                    preg_match(
-                        '/\b(atributos|agilidade|forca|intelecto|presenca|vigor)\b/u',
-                        $normalizedText
-                    )
+                    str_contains($normalizedText, 'cinco atributos')
+                    || str_contains($normalizedText, 'cada atributo')
                 ) {
-                    $score += 5;
-                }
-
-                // Evita favorecer páginas que só apresentam exemplos.
-                if (
-                    $asksForAttributeNames
-                    && str_contains(
-                        $normalizedText,
-                        'exemplos de testes de atributo'
-                    )
-                ) {
-                    $score -= 20;
-                }
-
-                // Favorece páginas que relacionam atributos e perícias.
-                if (
-                    $asksAboutAttributeSkills
-                    && str_contains($normalizedText, 'atributo base')
-                    && $foundAttributes === 5
-                ) {
-                    $score += 40;
+                    $score += 15;
                 }
             }
 
-            if ($matchedWords === 0) {
+            // Relação entre atributos e perícias.
+            if ($asksAboutAttributeSkills) {
+                $matchedAttributeSkillPhrases = 0;
+
+                foreach ($attributeSkillPhrases as $phrase) {
+                    if (str_contains($normalizedText, $phrase)) {
+                        $matchedAttributeSkillPhrases++;
+                    }
+                }
+
+                $score += $matchedAttributeSkillPhrases * 25;
+
+                if ($matchedAttributeSkillPhrases >= 3) {
+                    $score += 50;
+                }
+
+                if (
+                    str_contains($normalizedText, 'atributo base')
+                    && str_contains($normalizedText, 'pericias')
+                ) {
+                    $score += 20;
+                }
+            }
+
+            // Pontos de Esforço.
+            if ($asksAboutEffort) {
+                if (str_contains($normalizedText, 'pontos de esforco')) {
+                    $score += 35;
+                }
+
+                if (
+                    str_contains($normalizedText, 'quantas habilidades')
+                    && str_contains($normalizedText, 'presenca')
+                ) {
+                    $score += 15;
+                }
+
+                if (
+                    str_contains(
+                        $normalizedText,
+                        'uma medida de sua energia determinacao e forca interior'
+                    )
+                ) {
+                    $score += 25;
+                }
+
+                if (
+                    str_contains(
+                        $normalizedText,
+                        'recuperando pv pe e san'
+                    )
+                ) {
+                    $score -= 10;
+                }
+            }
+
+            // Defesa base e modificadores.
+            if ($asksAboutDefense) {
+                if (
+                    str_contains(
+                        $normalizedText,
+                        'a defesa representa o quao dificil e acerta lo em combate'
+                    )
+                ) {
+                    $score += 100;
+                }
+
+                if (
+                    str_contains(
+                        $normalizedText,
+                        'sua defesa e igual a 10'
+                    )
+                    && str_contains($normalizedText, 'agilidade')
+                ) {
+                    $score += 100;
+                }
+
+                if (
+                    str_contains(
+                        $normalizedText,
+                        'modificadores por habilidades equipamentos e condicoes'
+                    )
+                ) {
+                    $score += 50;
+                }
+
+                if (
+                    str_contains($normalizedText, 'defesa')
+                    && str_contains($normalizedText, 'protecao')
+                    && !str_contains($normalizedText, 'sua defesa e igual a 10')
+                ) {
+                    $score += 5;
+                }
+            }
+
+            // Resistência contra rituais.
+            if ($asksAboutRitualResistance) {
+                if (
+                    str_contains(
+                        $normalizedText,
+                        'protecao contra rituais'
+                    )
+                ) {
+                    $score += 50;
+                }
+
+                if (
+                    str_contains(
+                        $normalizedText,
+                        'testes de resistencia contra rituais'
+                    )
+                ) {
+                    $score += 35;
+                }
+
+                if (
+                    str_contains(
+                        $normalizedText,
+                        'criaturas paranormais'
+                    )
+                ) {
+                    $score += 20;
+                }
+            }
+
+            if ($matchedWords === 0 && $score === 0) {
                 continue;
             }
 
             $results[] = [
                 'page' => $number,
                 'score' => $score,
-                'matched_words' => $matchedWords,
                 'text' => $text,
                 'normalized_text' => $normalizedText,
             ];
@@ -284,7 +297,6 @@ class BookSearchService
             return '';
         }
 
-        // Ordena por pontuação e, em caso de empate, pela página.
         usort(
             $results,
             fn (array $a, array $b): int =>
@@ -292,19 +304,18 @@ class BookSearchService
                 ?: ($a['page'] <=> $b['page'])
         );
 
-        // Para perguntas específicas sobre resistência contra rituais,
-        // mantém páginas que contêm a regra procurada.
+        // Rituais: mantém apenas a página com a regra específica.
         if ($asksAboutRitualResistance) {
             $exactMatches = array_values(array_filter(
                 $results,
                 fn (array $item): bool =>
                     str_contains(
                         $item['normalized_text'],
-                        'testes de resistencia contra rituais y habilidades de criaturas paranormales'
+                        'protecao contra rituais'
                     )
-                    || str_contains(
+                    && str_contains(
                         $item['normalized_text'],
-                        'testes de resistencia contra rituais e habilidades de criaturas paranormais'
+                        'testes de resistencia contra rituais'
                     )
             ));
 
@@ -313,21 +324,44 @@ class BookSearchService
             }
         }
 
-        // Para perguntas sobre atributos, prioriza páginas
-        // que apresentam todos os cinco nomes.
-        if ($asksAboutAttributes) {
-            $completeAttributePages = array_values(array_filter(
+        // Perícias: prioriza páginas que relacionam vários atributos.
+        if ($asksAboutAttributeSkills) {
+            $skillPages = array_values(array_filter(
+                $results,
+                function (array $item) use (
+                    $attributeSkillPhrases
+                ): bool {
+                    $matches = 0;
+
+                    foreach ($attributeSkillPhrases as $phrase) {
+                        if (
+                            str_contains(
+                                $item['normalized_text'],
+                                $phrase
+                            )
+                        ) {
+                            $matches++;
+                        }
+                    }
+
+                    return $matches >= 3;
+                }
+            ));
+
+            if ($skillPages !== []) {
+                $results = $skillPages;
+            }
+        }
+
+        // Atributos: prioriza páginas com os cinco nomes.
+        if ($asksForAttributeNames) {
+            $attributePages = array_values(array_filter(
                 $results,
                 function (array $item) use ($attributeNames): bool {
                     $text = ' ' . $item['normalized_text'] . ' ';
 
                     foreach ($attributeNames as $attribute) {
-                        if (
-                            !str_contains(
-                                $text,
-                                ' ' . $attribute . ' '
-                            )
-                        ) {
+                        if (!str_contains($text, ' ' . $attribute . ' ')) {
                             return false;
                         }
                     }
@@ -336,75 +370,53 @@ class BookSearchService
                 }
             ));
 
-            if ($completeAttributePages !== []) {
-                $results = $completeAttributePages;
-            }
-
-            // Para perguntas que pedem os nomes, prioriza a lista direta.
-            if ($asksForAttributeNames) {
-                $directListPages = array_values(array_filter(
-                    $results,
-                    function (array $item) use ($attributeNames): bool {
-                        $text = $item['normalized_text'];
-
-                        return str_contains(
-                            $text,
-                            'cinco atributos'
-                        ) && count(array_filter(
-                            $attributeNames,
-                            fn (string $attribute): bool =>
-                                str_contains(
-                                    ' ' . $text . ' ',
-                                    ' ' . $attribute . ' '
-                                )
-                        )) === 5;
-                    }
-                ));
-
-                if ($directListPages !== []) {
-                    $results = $directListPages;
-                }
+            if ($attributePages !== []) {
+                $results = $attributePages;
             }
         }
 
-        // Para perguntas sobre perícias, evita páginas genéricas
-        // quando existe uma página que reúne os cinco atributos.
-        if ($asksAboutAttributeSkills) {
-            $attributeSkillPages = array_values(array_filter(
+        // Defesa: prioriza a regra que apresenta o cálculo.
+        if ($asksAboutDefense) {
+            $defensePages = array_values(array_filter(
                 $results,
-                function (array $item) use ($attributeNames): bool {
-                    $text = ' ' . $item['normalized_text'] . ' ';
-
-                    foreach ($attributeNames as $attribute) {
-                        if (
-                            !str_contains(
-                                $text,
-                                ' ' . $attribute . ' '
-                            )
-                        ) {
-                            return false;
-                        }
-                    }
-
-                    return str_contains(
+                fn (array $item): bool =>
+                    str_contains(
                         $item['normalized_text'],
-                        'atributo base'
-                    );
-                }
+                        'sua defesa e igual a 10'
+                    )
+                    && str_contains(
+                        $item['normalized_text'],
+                        'agilidade'
+                    )
             ));
 
-            if ($attributeSkillPages !== []) {
-                $results = $attributeSkillPages;
+            if ($defensePages !== []) {
+                $results = $defensePages;
             }
         }
 
-        // Remove resultados muito abaixo da melhor correspondência.
-        $bestScore = $results[0]['score'] ?? 0;
+        // PE: prioriza a definição principal dos Pontos de Esforço.
+        if ($asksAboutEffort) {
+            $effortPages = array_values(array_filter(
+                $results,
+                fn (array $item): bool =>
+                    str_contains(
+                        $item['normalized_text'],
+                        'pontos de esforco'
+                    )
+                    && str_contains(
+                        $item['normalized_text'],
+                        'uma medida de sua energia determinacao e forca interior'
+                    )
+            ));
 
-        $minimumScore = max(
-            5,
-            (int) ceil($bestScore * 0.35)
-        );
+            if ($effortPages !== []) {
+                $results = $effortPages;
+            }
+        }
+
+        $bestScore = $results[0]['score'] ?? 0;
+        $minimumScore = max(5, (int) ceil($bestScore * 0.35));
 
         $results = array_values(array_filter(
             $results,
@@ -412,16 +424,14 @@ class BookSearchService
                 $item['score'] >= $minimumScore
         ));
 
-        $selected = array_slice(
-            $results,
-            0,
-            max(1, $limit)
-        );
+        $selected = array_slice($results, 0, max(1, $limit));
 
-        // Monta o contexto que será enviado à IA.
         return implode("\n\n---\n\n", array_map(
             function (array $item) use (
                 $asksAboutRitualResistance,
+                $asksForAttributeNames,
+                $asksAboutEffort,
+                $asksAboutDefense,
                 $asksAboutAttributeSkills
             ): string {
                 $text = $item['text'];
@@ -432,9 +442,65 @@ class BookSearchService
                     if ($excerpt !== '') {
                         $text = $excerpt;
                     }
+                } elseif ($asksForAttributeNames) {
+                    $excerpt = $this->extractAround(
+                        $text,
+                        'cinco atributos',
+                        250,
+                        700
+                    );
+
+                    if ($excerpt !== '') {
+                        $text = $excerpt;
+                    }
+                } elseif ($asksAboutEffort) {
+                    $excerpt = $this->extractSection(
+                        $text,
+                        'Pontos de Esforço',
+                        [
+                            'Uma medida de sua saúde',
+                            'Recuperando PV, PE e SAN',
+                            'PONTOS TEMPORÁRIOS',
+                        ],
+                        800
+                    );
+
+                    if ($excerpt !== '') {
+                        $text = $excerpt;
+                    }
+                } elseif ($asksAboutDefense) {
+                    // Começa na regra de Defesa e termina antes
+                    // do próximo tópico da página.
+                    $excerpt = $this->extractSection(
+                        $text,
+                        'A Defesa representa',
+                        [
+                            'Deslocamento',
+                            'DESCRICAO',
+                        ],
+                        650
+                    );
+
+                    if ($excerpt !== '') {
+                        $text = $excerpt;
+                    }
+                } elseif ($asksAboutAttributeSkills) {
+                    // Mantém a relação entre atributos e perícias,
+                    // removendo o exemplo de criação de personagem.
+                    $excerpt = $this->extractSection(
+                        $text,
+                        'Agilidade é o atributo-base',
+                        [
+                            'EXEMPLO DE CRIAÇÃO DE PERSONAGEM',
+                        ],
+                        3500
+                    );
+
+                    if ($excerpt !== '') {
+                        $text = $excerpt;
+                    }
                 }
 
-                // Não corta a lista de atributos e perícias no meio.
                 $maxLength = $asksAboutAttributeSkills ? 6000 : 1800;
 
                 return "PÁGINA {$item['page']}\n"
@@ -444,13 +510,93 @@ class BookSearchService
         ));
     }
 
-    /**
-     * Extrai Proteção contra Rituais até o fim da versão Verdadeiro.
-     */
+    private function getSearchWords(string $question): array
+    {
+        $ignored = [
+            'que', 'qual', 'quais', 'como', 'cada',
+            'uma', 'uns', 'das', 'dos', 'para', 'sobre',
+            'com', 'sem', 'sao', 'ser', 'por', 'em',
+            'de', 'do', 'da', 'e', 'o', 'a', 'no',
+            'na', 'um', 'meu', 'minha', 'livro', 'regras',
+            'regra', 'funciona', 'funcionam', 'personagem',
+            'ordem', 'paranormal', 'relacionadas', 'relacionada',
+            'cinco', 'atributo', 'atributos', 'pericia', 'pericias',
+            'pontos', 'ponto', 'calculo', 'modificadores',
+            'aplicam', 'usado', 'usada', 'lista', 'completa',
+        ];
+
+        $questionWords = preg_split(
+            '/\s+/u',
+            $question,
+            -1,
+            PREG_SPLIT_NO_EMPTY
+        ) ?: [];
+
+        return array_values(array_unique(array_filter(
+            $questionWords,
+            fn (string $word): bool =>
+                mb_strlen($word) >= 3
+                && !in_array($word, $ignored, true)
+        )));
+    }
+
+    private function extractAround(
+        string $text,
+        string $term,
+        int $before,
+        int $length
+    ): string {
+        $position = mb_stripos($text, $term);
+
+        if ($position === false) {
+            return '';
+        }
+
+        $start = max(0, $position - $before);
+
+        return trim(mb_substr($text, $start, $length, 'UTF-8'));
+    }
+
+    private function extractSection(
+        string $text,
+        string $startTerm,
+        array $endTerms,
+        int $maxLength
+    ): string {
+        $start = mb_stripos($text, $startTerm);
+
+        if ($start === false) {
+            return '';
+        }
+
+        $excerpt = mb_substr($text, $start);
+        $endPosition = null;
+
+        foreach ($endTerms as $endTerm) {
+            $position = mb_stripos(
+                $excerpt,
+                $endTerm,
+                mb_strlen($startTerm)
+            );
+
+            if (
+                $position !== false
+                && ($endPosition === null || $position < $endPosition)
+            ) {
+                $endPosition = $position;
+            }
+        }
+
+        if ($endPosition !== null) {
+            $excerpt = mb_substr($excerpt, 0, $endPosition);
+        }
+
+        return trim(mb_substr($excerpt, 0, $maxLength, 'UTF-8'));
+    }
+
     private function extractRitualExcerpt(string $text): string
     {
         $title = 'Proteção contra Rituais';
-
         $start = mb_stripos($text, $title);
 
         if ($start === false) {
@@ -476,12 +622,7 @@ class BookSearchService
                 'UTF-8'
             );
 
-            $excerpt = mb_substr(
-                $excerpt,
-                0,
-                $characterEnd,
-                'UTF-8'
-            );
+            $excerpt = mb_substr($excerpt, 0, $characterEnd, 'UTF-8');
         } else {
             $excerpt = mb_substr($excerpt, 0, 1200, 'UTF-8');
         }
@@ -489,46 +630,29 @@ class BookSearchService
         return trim($excerpt);
     }
 
-    /**
-     * Padroniza o texto para facilitar as comparações.
-     */
     private function normalize(string $text): string
     {
         $text = mb_strtolower($text);
 
-        // Une palavras separadas por hífen no fim da linha pelo OCR.
         $text = preg_replace(
             '/(\p{L})-[ \t]*\R[ \t]*(?=\p{L})/u',
             '$1',
             $text
         ) ?? $text;
 
-        // Remove acentos para comparar termos equivalentes.
         $text = strtr($text, [
-            'á' => 'a',
-            'à' => 'a',
-            'ã' => 'a',
-            'â' => 'a',
-            'é' => 'e',
-            'ê' => 'e',
-            'í' => 'i',
-            'ó' => 'o',
-            'ô' => 'o',
-            'õ' => 'o',
-            'ú' => 'u',
-            'ü' => 'u',
-            'ç' => 'c',
+            'á' => 'a', 'à' => 'a', 'ã' => 'a', 'â' => 'a',
+            'é' => 'e', 'ê' => 'e', 'í' => 'i',
+            'ó' => 'o', 'ô' => 'o', 'õ' => 'o',
+            'ú' => 'u', 'ü' => 'u', 'ç' => 'c',
         ]);
 
-        // Substitui pontuação e quebras de linha por espaços.
         $text = preg_replace(
             '/[^\p{L}\p{N}%]+/u',
             ' ',
             $text
         ) ?? $text;
 
-        return trim(
-            preg_replace('/\s+/u', ' ', $text) ?? $text
-        );
+        return trim(preg_replace('/\s+/u', ' ', $text) ?? $text);
     }
 }

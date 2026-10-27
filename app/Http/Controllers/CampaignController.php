@@ -15,6 +15,16 @@ class CampaignController extends Controller
         return view('campaigns.create');
     }
 
+    /**
+     * Exibe os detalhes de uma campanha.
+     */
+    public function show(Campaign $campaign): View
+    {
+        $campaign->load('characters');
+
+        return view('campaigns.show', compact('campaign'));
+    }
+
     public function store(Request $request): RedirectResponse
     {
         $validated = $request->validate([
@@ -64,7 +74,7 @@ class CampaignController extends Controller
         Request $request,
         Campaign $campaign
     ): RedirectResponse {
-        $validated = $request->validate([
+        $request->validate([
             'cover' => [
                 'nullable',
                 'image',
